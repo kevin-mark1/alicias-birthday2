@@ -41,9 +41,9 @@
         .shaking-option { animation: mildShake 2s infinite; }
         .slide-up-anim { animation: slideUp 0.8s ease-out forwards; }
 
-        /* Full-Screen Option Modals */
-        .option-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 200; flex-direction: column; justify-content: center; align-items: center; color: white; }
-        .back-btn { position: absolute; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.2); border: 2px solid white; color: white; border-radius: 20px; padding: 8px 15px; font-size: 16px; cursor: pointer; z-index: 300; font-weight: bold; backdrop-filter: blur(5px); }
+        /* Full-Screen Option Modals (Z-INDEX 400 TO COVER EVERYTHING) */
+        .option-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 400; flex-direction: column; justify-content: center; align-items: center; color: white; }
+        .back-btn { position: absolute; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.2); border: 2px solid white; color: white; border-radius: 20px; padding: 8px 15px; font-size: 16px; cursor: pointer; z-index: 410; font-weight: bold; backdrop-filter: blur(5px); }
 
         /* Bouquet (Scrollable) */
         .bouquet-cluster { display: flex; flex-wrap: wrap; justify-content: center; width: 350px; position: relative; z-index: 2; padding: 10px; margin-bottom: -15px; max-height: 65vh; overflow-y: auto; overflow-x: hidden; }
@@ -70,7 +70,7 @@
         .letter-content p { margin-bottom: 15px; }
         .letter-signature { margin-top: 25px; font-style: italic; font-weight: bold; color: #ff1a8c; font-size: 18px; text-align: right; }
 
-        /* Minion Companion UI - POPPED TO FRONT OVER MODALS */
+        /* Minion Companion UI - Z-INDEX 250 */
         #companion-area { position: fixed; bottom: 0; left: 10px; z-index: 250; display: none; align-items: flex-end; height: 120px; width: 150px; perspective: 600px; }
         #door-frame { position: absolute; bottom: 0; left: 0; width: 60px; height: 90px; background: #3d1c04; border-radius: 10px 10px 0 0; z-index: 1; }
         #door { width: 60px; height: 90px; background: #8B4513; border: 3px solid #5C2E0B; border-bottom: none; border-radius: 10px 10px 0 0; position: absolute; bottom: 0; left: 0; z-index: 3; transform-origin: left; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -101,7 +101,7 @@
 
         /* Finale Elements */
         #finale-text { display: none; position: absolute; top: 10%; font-size: 35px; animation: dropDownSlow 3s ease-out forwards; z-index: 10; line-height: 1.2; padding: 15px 30px; margin: 0; }
-        #signature { display: none; position: fixed; bottom: 15px; right: 20px; font-size: 28px; color: #ff1a8c; font-style: italic; opacity: 0; animation: fadeIn 2s forwards; z-index: 300; font-weight: bold; }
+        #signature { display: none; position: fixed; bottom: 15px; right: 20px; font-size: 28px; color: #ff1a8c; font-style: italic; opacity: 0; animation: fadeIn 2s forwards; z-index: 100; font-weight: bold; }
         .candle { width: 10px; height: 35px; background: repeating-linear-gradient(45deg, #fff, #fff 5px, #ff1a8c 5px, #ff1a8c 10px); position: relative; border-radius: 2px; }
         .flame { width: 14px; height: 22px; background: radial-gradient(ellipse at bottom, #fff 10%, #ffcc00 40%, #ff3300 80%); border-radius: 50% 50% 20% 20%; position: absolute; top: -22px; left: -1px; animation: flicker 0.1s infinite alternate; box-shadow: 0 0 10px #ffcc00; transform-origin: bottom center; }
         
@@ -276,7 +276,7 @@
             document.getElementById('screen1').classList.add('active');
         }
 
-        // Custom duration added so we can control exactly how long he speaks
+        // Custom duration added so we can control exactly how long he stays out
         function triggerYay(message, duration = 3500) {
             let minion = document.getElementById('minion-companion');
             let bubble = document.getElementById('speech-bubble');
@@ -304,14 +304,28 @@
             }, 300); 
         }
 
-        function triggerHeart() {
+        // Heart logic: pops out, shows heart for 3 seconds, retreats completely.
+        function triggerHeart(duration = 3000) {
             let minion = document.getElementById('minion-companion');
             let door = document.getElementById('door');
             let heart = document.getElementById('minion-heart');
             door.style.transform = "rotateY(-100deg)";
             setTimeout(() => {
                 minion.style.transform = "translateX(65px)";
-                setTimeout(() => { heart.classList.add('show-heart'); }, 500);
+                setTimeout(() => { 
+                    heart.classList.add('show-heart'); 
+                    setTimeout(() => {
+                        heart.classList.remove('show-heart');
+                        minion.style.transform = "translateX(65px) scaleX(-1)";
+                        setTimeout(() => {
+                            minion.style.transform = "translateX(0) scaleX(-1)";
+                            setTimeout(() => {
+                                door.style.transform = "rotateY(0deg)";
+                                minion.style.transform = "translateX(0) scaleX(1)";
+                            }, 500);
+                        }, 500);
+                    }, duration);
+                }, 500);
             }, 300);
         }
 
@@ -605,18 +619,17 @@
                 requestAnimationFrame(frame);
             }());
             
-            // Screams exactly for 2000 milliseconds (2 seconds) then runs inside
-            triggerYay("HAPPY BIRTHDAY ALICIA!!!!", 2000);
+            // Minion screams exactly for 3000 milliseconds (3 seconds) then runs completely inside
+            triggerYay("HAPPY BIRTHDAY ALICIA!!!!", 3000);
 
-            // Comes out with the heart safely after finishing his previous animation loop (4500ms)
+            // Comes out with the heart exactly after finishing his previous loop, holds for 3 seconds, runs back
             setTimeout(() => {
-                triggerHeart();
-            }, 4500);
+                triggerHeart(3000);
+            }, 5500);
 
-            // Show gift video icon exactly 3 seconds after Happy Birthday appears
+            // Shows the gift video icon at T=3 seconds after the Happy Birthday text drops
             setTimeout(() => {
                 document.getElementById('gift-video-btn').style.display = 'block';
-                triggerYay("I have a video for you!");
             }, 3000);
         }
     </script>
