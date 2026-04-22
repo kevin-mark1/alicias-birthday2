@@ -268,7 +268,6 @@
         function openInitialPresent() {
             balloonInterval = setInterval(spawnHappyBalloon, 700);
             
-            // Automatically clear balloons after 30 seconds
             setTimeout(() => {
                 clearInterval(balloonInterval);
             }, 30000);
@@ -277,7 +276,6 @@
             document.getElementById('screen1').classList.add('active');
         }
 
-        // Custom duration added so we can control exactly how long he stays out
         function triggerYay(message, duration = 3500) {
             let minion = document.getElementById('minion-companion');
             let bubble = document.getElementById('speech-bubble');
@@ -289,7 +287,6 @@
                 minion.style.transform = "translateX(65px)"; 
                 setTimeout(() => {
                     bubble.classList.add('show-bubble'); 
-                    // Bubble stays on screen for the specified duration
                     setTimeout(() => {
                         bubble.classList.remove('show-bubble'); 
                         minion.style.transform = "translateX(65px) scaleX(-1)"; 
@@ -315,7 +312,7 @@
                 setTimeout(() => { 
                     heart.classList.add('show-heart'); 
                     setTimeout(() => {
-                        heart.classList.remove('show-heart');
+                        // Minion runs back inside, but the heart stays behind!
                         minion.style.transform = "translateX(65px) scaleX(-1)";
                         setTimeout(() => {
                             minion.style.transform = "translateX(0) scaleX(-1)";
@@ -514,6 +511,7 @@
                         clearInterval(bananaInterval); 
                         document.querySelectorAll('.banana').forEach(b => b.remove());
                         
+                        triggerYay("Yayyyy cake time!", 4000);
                         setTimeout(startFinale, 4000);
                     }
                 };
@@ -590,16 +588,12 @@
         }
 
         function triggerWin() {
-            // Hides ONLY the flames, leaving the candle sticks on the cake!
             let flames = document.querySelectorAll('.flame');
             flames.forEach(f => f.style.display = 'none');
             
             document.getElementById('mic-instruction').style.display = 'none';
             
-            // Drop the pink Happy Birthday bubble
             document.getElementById('finale-text').style.display = 'inline-block';
-            
-            // Show Signature in bottom right corner
             document.getElementById('signature').style.display = 'block';
             
             let duration = 30 * 1000;
