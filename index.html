@@ -10,9 +10,14 @@
         body { font-family: Arial, sans-serif; text-align: center; background: #ffb6c1; margin: 0; overflow: hidden; }
         .screen { display: none; height: 100vh; width: 100vw; flex-direction: column; justify-content: center; align-items: center; }
         .active { display: flex; }
-        .btn { padding: 15px 30px; margin: 10px; font-size: 18px; border: none; border-radius: 10px; cursor: pointer; background: #ff1a8c; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn { padding: 15px 30px; margin: 10px; font-size: 18px; border: none; border-radius: 10px; cursor: pointer; background: #ff1a8c; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 100; }
+        
+        /* Dashboard Layout */
         .grid { display: grid; grid-template-columns: auto auto; gap: 25px; justify-content: center; z-index: 10; position: relative; margin: 0 auto; }
         .icon { width: 130px; height: 130px; background: #ff69b4; border-radius: 25px; display: flex; align-items: center; justify-content: center; font-size: 65px; cursor: pointer; transition: transform 0.3s, opacity 0.3s; box-shadow: 0 6px 10px rgba(0,0,0,0.15); color: white; z-index: 10; position: relative; }
+        /* Centers the 3rd option below the first two */
+        #opt3 { grid-column: span 2; justify-self: center; }
+        
         #starting-present { font-size: 100px; cursor: pointer; animation: intenseShake 1.5s infinite; z-index: 50; }
         
         /* Lock States and Animations */
@@ -26,8 +31,8 @@
         .option-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 200; flex-direction: column; justify-content: center; align-items: center; color: white; }
         .back-btn { position: absolute; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.2); border: 2px solid white; color: white; border-radius: 20px; padding: 8px 15px; font-size: 16px; cursor: pointer; z-index: 300; font-weight: bold; backdrop-filter: blur(5px); }
 
-        /* Bouquet */
-        .bouquet-cluster { display: flex; flex-wrap: wrap; justify-content: center; width: 350px; position: relative; z-index: 2; padding: 10px; margin-bottom: -15px;}
+        /* Bouquet (Scrollable) */
+        .bouquet-cluster { display: flex; flex-wrap: wrap; justify-content: center; width: 350px; position: relative; z-index: 2; padding: 10px; margin-bottom: -15px; max-height: 65vh; overflow-y: auto; overflow-x: hidden; }
         .flower-pic { width: 100px; height: 100px; background: #fff; border: 4px solid white; box-shadow: 0 3px 6px rgba(0,0,0,0.5); margin: -10px; border-radius: 12px; background-size: cover; background-position: center; }
         .stem-container { width: 20px; height: 80px; background: #228B22; margin: 0 auto; border-radius: 0 0 10px 10px; position: relative; z-index: 1; display: flex; justify-content: center; align-items: center; box-shadow: inset 3px 0 6px rgba(0,0,0,0.2); }
         .bow { width: 50px; height: 15px; background: #ff1a8c; position: absolute; top: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
@@ -63,15 +68,16 @@
         #minion-heart { position: absolute; bottom: 20px; left: 80px; font-size: 40px; opacity: 0; transition: opacity 1s, transform 1s; z-index: 5; pointer-events: none; }
         .show-heart { opacity: 1 !important; transform: translateY(-60px) scale(1.5); }
 
-        /* Dynamic Cake Building Game */
+        /* Dynamic Chocolate Cake Building Game */
         #fifth-icon { display: none; background: #ff3333; margin-top: 20px; z-index: 10; position: relative; }
         #cake-container { width: 200px; height: 200px; margin-top: 20px; display: flex; flex-direction: column-reverse; align-items: center; z-index: 10; position: relative; }
-        .cake-piece { background: #f4d03f; box-sizing: border-box; animation: dropPiece 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; margin: 0 auto; box-shadow: inset 0 -3px 5px rgba(0,0,0,0.15); }
-        .balloon, .banana { position: absolute; bottom: -100px; font-size: 80px; cursor: pointer; animation: floatUp 5s linear infinite; z-index: 20; }
+        .cake-piece { background: #4a2511; box-sizing: border-box; animation: dropPiece 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; margin: 0 auto; box-shadow: inset 0 -3px 5px rgba(0,0,0,0.3); }
+        .balloon { position: absolute; bottom: -100px; font-size: 80px; z-index: 20; animation: floatUp 5s linear infinite; }
+        .banana { position: absolute; font-size: 60px; cursor: pointer; z-index: 20; }
         
-        /* Realistic Finale Cake */
+        /* Realistic Chocolate Finale Cake */
         .realistic-cake { position: relative; display: flex; flex-direction: column; align-items: center; z-index: 10; margin-top: 30px; }
-        .tier { background: #f4d03f; border-top: 5px solid #fff; box-shadow: inset 0 -5px 10px rgba(0,0,0,0.1); position: relative; }
+        .tier { background: #4a2511; border-top: 5px solid #fff; box-shadow: inset 0 -5px 10px rgba(0,0,0,0.4); position: relative; }
         .tier::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 8px; background: #fff; border-radius: 0 0 5px 5px; }
         .top-tier { width: 100px; height: 40px; border-radius: 10px 10px 0 0; }
         .mid-tier { width: 140px; height: 50px; border-radius: 5px 5px 0 0; }
@@ -212,21 +218,36 @@
         let viewed = { 1: false, 2: false, 3: false };   
         let bananasCollected = 0;
         let balloonInterval;
-        let balloonTimeout;
+        let sadInterval;
+        let bananaInterval;
+
+        function spawnHappyBalloon() {
+            let balloon = document.createElement('div');
+            balloon.className = 'balloon';
+            balloon.innerText = '🎈';
+            balloon.style.left = Math.random() * 90 + 'vw';
+            balloon.style.animationDuration = (Math.random() * 2 + 3) + 's';
+            document.body.appendChild(balloon);
+            setTimeout(() => { if (balloon.parentNode) balloon.remove(); }, 5000);
+        }
+
+        function spawnSadEmoji() {
+            let sad = document.createElement('div');
+            sad.className = 'balloon'; // reusing the float up animation class
+            let emojis = ['🥺', '😭', '😢', '💔'];
+            sad.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            sad.style.left = Math.random() * 90 + 'vw';
+            sad.style.animationDuration = (Math.random() * 2 + 3) + 's';
+            document.body.appendChild(sad);
+            setTimeout(() => { if (sad.parentNode) sad.remove(); }, 5000);
+        }
 
         function openInitialPresent() {
-            // Balloons spawn for 30 seconds
-            balloonInterval = setInterval(() => {
-                let balloon = document.createElement('div');
-                balloon.className = 'balloon';
-                balloon.innerText = '🎈';
-                balloon.style.left = Math.random() * 90 + 'vw';
-                balloon.style.animationDuration = (Math.random() * 2 + 3) + 's';
-                document.body.appendChild(balloon);
-                setTimeout(() => { if(balloon.parentNode) balloon.remove(); }, 5000);
-            }, 700);
+            // Balloons start spawning
+            balloonInterval = setInterval(spawnHappyBalloon, 700);
 
-            balloonTimeout = setTimeout(() => {
+            // Automatically clear balloons after 30 seconds if she hasn't clicked anything
+            setTimeout(() => {
                 clearInterval(balloonInterval);
             }, 30000);
 
@@ -235,7 +256,6 @@
         }
 
         function triggerYay(message) {
-            // Minion Voice Add-on
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel(); 
                 const utterance = new SpeechSynthesisUtterance(message);
@@ -280,21 +300,30 @@
         }
 
         function doNotOpen() {
+            clearInterval(balloonInterval);
+            sadInterval = setInterval(spawnSadEmoji, 700);
+            
             document.getElementById('screen1-buttons').style.display = 'none';
             document.getElementById('sad-minion-container').style.display = 'block';
             document.getElementById('screen1-back-btn').style.display = 'block';
+            
+            triggerYay("Oh no! Please open it!");
         }
 
         function resetScreen1() {
+            clearInterval(sadInterval);
+            balloonInterval = setInterval(spawnHappyBalloon, 700);
+            
             document.getElementById('screen1-buttons').style.display = 'block';
             document.getElementById('sad-minion-container').style.display = 'none';
             document.getElementById('screen1-back-btn').style.display = 'none';
+            
+            triggerYay("Yay! You came back!");
         }
 
         function goToDashboard() {
-            // Clear balloons if she taps the Open option
             clearInterval(balloonInterval);
-            clearTimeout(balloonTimeout);
+            clearInterval(sadInterval);
 
             let music = document.getElementById('bg-music');
             music.volume = 0.2; 
@@ -311,7 +340,6 @@
         function buildBouquet() {
             let container = document.getElementById('bouquet-photos');
             container.innerHTML = ''; 
-            // Changed to 20 flowers
             for(let i=1; i<=20; i++) {
                 let rotation = -15 + (Math.random() * 30); 
                 container.innerHTML += `<div class="flower-pic" style="background-image: url('assets/pic${i}.jpg'); background-color: #ddd; transform: rotate(${rotation}deg);"></div>`;
@@ -321,7 +349,7 @@
         function buildAlbumBook() {
             let book = document.getElementById('album-book');
             if(book.innerHTML !== '') return; 
-            let totalPages = 15; // Changed to 15 Pages
+            let totalPages = 15; 
             for(let i = 1; i <= totalPages; i++) {
                 let page = document.createElement('div');
                 page.className = 'page';
@@ -335,6 +363,8 @@
                         this.classList.add('turned');
                         setTimeout(() => { this.style.zIndex = i; }, 400); 
                         if(i === 1) book.classList.add('open'); 
+                        // Normal Minion language
+                        triggerYay("Next page!");
                     }
                 };
                 let front = document.createElement('div');
@@ -357,7 +387,6 @@
             setTimeout(() => {
                 if(num === 1) buildBouquet();
                 if(num === 2) buildAlbumBook(); 
-                // Video is no longer handled here
                 
                 document.getElementById('modal-' + num).style.display = 'flex';
             }, 100); 
@@ -366,10 +395,11 @@
         function closeModal(num) {
             document.getElementById('modal-' + num).style.display = 'none';
             
+            // Plain English Messages
             let minionMessages = {
-                1: "Ooo, Pwede na! 🌸",
-                2: "Papoy! 📸",
-                3: "Tulaliloo ti amo! 💌"
+                1: "Beautiful flowers for you! 🌸",
+                2: "Look at our memories! 📸",
+                3: "A special letter just for you! 💌"
             };
             if(!viewed[num]) {
                 triggerYay(minionMessages[num]);
@@ -378,7 +408,6 @@
             viewed[num] = true;
 
             let nextNum = num + 1;
-            // Now checks up to 3 (since video is removed from dashboard)
             if (nextNum <= 3 && !unlocked[nextNum]) {
                 unlocked[nextNum] = true;
                 let nextBtn = document.getElementById('opt' + nextNum);
@@ -408,32 +437,53 @@
         function startBananaGame() {
             document.getElementById('screen2').classList.remove('active');
             document.getElementById('screen3').classList.add('active');
+            
+            // Minion screams BANANAAAA before the game starts
+            triggerYay("BANANAAAA!!!!!");
+            
+            // Starts the game slightly slower and with less collision
             spawnBananas();
         }
 
         function spawnBananas() {
             let gameArea = document.getElementById('screen3');
-            let interval = setInterval(() => {
+            // Changed from 800ms to 1200ms to reduce overlap and frequency
+            bananaInterval = setInterval(() => {
                 if (bananasCollected >= 19) {
-                    clearInterval(interval);
+                    clearInterval(bananaInterval);
                     return;
                 }
                 let banana = document.createElement('div');
                 banana.className = 'banana';
                 banana.innerText = '🍌';
                 banana.style.left = Math.random() * 80 + 'vw';
+                banana.style.top = '-50px';
+                
+                // Slowed down falling animation to 5 seconds
+                let animation = banana.animate([{ top: '-50px' }, { top: '80vh' }], { duration: 5000 });
+                
                 banana.onclick = function() {
                     this.remove();
                     bananasCollected++;
                     buildCake();
                     
                     if (bananasCollected === 19) {
-                        triggerYay("Nice Work!");
-                        setTimeout(startFinale, 5000);
+                        clearInterval(bananaInterval); // Stops new bananas instantly
+                        
+                        // Instantly clear all remaining bananas off the screen
+                        document.querySelectorAll('.banana').forEach(b => b.remove());
+                        
+                        triggerYay("You built the cake!");
+                        setTimeout(startFinale, 4000);
                     }
                 };
+                
+                animation.onfinish = function() {
+                    if (banana.parentNode) banana.remove();
+                };
+
                 gameArea.appendChild(banana);
-            }, 800);
+            }, 1200);
         }
 
         function buildCake() {
@@ -511,13 +561,13 @@
                 requestAnimationFrame(frame);
             }());
             
-            triggerYay("HAPPY BIRTHDAYYY!!!!");
+            triggerYay("Happy Birthday Alicia!");
             
             setTimeout(() => {
                 triggerHeart();
             }, 6800);
 
-            // Show video option exactly 5 seconds after Happy Birthday appears
+            // Show video option 5 seconds after words appeared
             setTimeout(() => {
                 let vidBtn = document.createElement('button');
                 vidBtn.className = 'btn';
