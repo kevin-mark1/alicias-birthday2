@@ -268,6 +268,7 @@
         function openInitialPresent() {
             balloonInterval = setInterval(spawnHappyBalloon, 700);
             
+            // Automatically clear balloons after 30 seconds
             setTimeout(() => {
                 clearInterval(balloonInterval);
             }, 30000);
@@ -388,8 +389,8 @@
             let book = document.getElementById('album-book');
             if(book.innerHTML !== '') return; 
             
-            // 15 images exactly: 1-9, 11-15, and replacing 10 with a duplicate of 2 at the end
-            const albumIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 2];
+            // 14 images exactly: 1-9, 11-15 (skipping 10 completely)
+            const albumIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15];
             let totalPages = albumIndices.length; 
             
             albumIndices.forEach((imgIdx, index) => {
@@ -589,12 +590,16 @@
         }
 
         function triggerWin() {
+            // Hides ONLY the flames, leaving the candle sticks on the cake!
             let flames = document.querySelectorAll('.flame');
             flames.forEach(f => f.style.display = 'none');
             
             document.getElementById('mic-instruction').style.display = 'none';
             
+            // Drop the pink Happy Birthday bubble
             document.getElementById('finale-text').style.display = 'inline-block';
+            
+            // Show Signature in bottom right corner
             document.getElementById('signature').style.display = 'block';
             
             let duration = 30 * 1000;
