@@ -72,7 +72,9 @@
         #fifth-icon { display: none; background: #ff3333; margin-top: 20px; z-index: 10; position: relative; }
         #cake-container { width: 200px; height: 200px; margin-top: 20px; display: flex; flex-direction: column-reverse; align-items: center; z-index: 10; position: relative; }
         .cake-piece { background: #4a2511; box-sizing: border-box; animation: dropPiece 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; margin: 0 auto; box-shadow: inset 0 -3px 5px rgba(0,0,0,0.3); }
-        .balloon { position: absolute; bottom: -100px; font-size: 80px; z-index: 20; animation: floatUp 5s linear infinite; }
+        
+        /* Floating Animations (Balloons & Emojis) */
+        .floating-item { position: absolute; bottom: -100px; font-size: 80px; z-index: 20; animation: floatUp 5s linear infinite; }
         .banana { position: absolute; font-size: 60px; cursor: pointer; z-index: 20; }
         
         /* Realistic Chocolate Finale Cake */
@@ -85,7 +87,7 @@
 
         /* Finale Elements */
         #finale-text { display: none; position: absolute; top: 10%; font-size: 45px; font-weight: bold; color: #ff007f; animation: dropDownSlow 3s ease-out forwards; text-shadow: 2px 2px 4px rgba(255,255,255,0.7); z-index: 10; line-height: 1.2; padding: 0 20px; }
-        #signature { display: none; position: absolute; bottom: 10%; right: 10%; font-size: 30px; color: #cc0066; animation: fadeIn 2s forwards; font-style: italic; z-index: 10; }
+        #signature { display: none; position: absolute; bottom: 15px; right: 15px; font-size: 28px; color: #ff1a8c; font-style: italic; opacity: 0; animation: fadeIn 2s forwards; z-index: 100; font-weight: bold; }
         .candle { width: 10px; height: 35px; background: repeating-linear-gradient(45deg, #fff, #fff 5px, #ff1a8c 5px, #ff1a8c 10px); position: relative; border-radius: 2px; }
         .flame { width: 14px; height: 22px; background: radial-gradient(ellipse at bottom, #fff 10%, #ffcc00 40%, #ff3300 80%); border-radius: 50% 50% 20% 20%; position: absolute; top: -22px; left: -1px; animation: flicker 0.1s infinite alternate; box-shadow: 0 0 10px #ffcc00; transform-origin: bottom center; }
         
@@ -223,7 +225,7 @@
 
         function spawnHappyBalloon() {
             let balloon = document.createElement('div');
-            balloon.className = 'balloon';
+            balloon.className = 'floating-item happy-balloon';
             balloon.innerText = '🎈';
             balloon.style.left = Math.random() * 90 + 'vw';
             balloon.style.animationDuration = (Math.random() * 2 + 3) + 's';
@@ -233,7 +235,7 @@
 
         function spawnSadEmoji() {
             let sad = document.createElement('div');
-            sad.className = 'balloon'; // reusing the float up animation class
+            sad.className = 'floating-item sad-emoji'; 
             let emojis = ['🥺', '😭', '😢', '💔'];
             sad.innerText = emojis[Math.floor(Math.random() * emojis.length)];
             sad.style.left = Math.random() * 90 + 'vw';
@@ -243,10 +245,9 @@
         }
 
         function openInitialPresent() {
-            // Balloons start spawning
             balloonInterval = setInterval(spawnHappyBalloon, 700);
-
-            // Automatically clear balloons after 30 seconds if she hasn't clicked anything
+            
+            // Automatically clear balloons after 30 seconds
             setTimeout(() => {
                 clearInterval(balloonInterval);
             }, 30000);
@@ -256,23 +257,17 @@
         }
 
         function triggerYay(message) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); 
-                const utterance = new SpeechSynthesisUtterance(message);
-                utterance.pitch = 2.0; 
-                utterance.rate = 1.3;  
-                window.speechSynthesis.speak(utterance);
-            }
-
             let minion = document.getElementById('minion-companion');
             let bubble = document.getElementById('speech-bubble');
             let door = document.getElementById('door');
             bubble.innerText = message; 
             door.style.transform = "rotateY(-100deg)"; 
+            
             setTimeout(() => {
                 minion.style.transform = "translateX(65px)"; 
                 setTimeout(() => {
                     bubble.classList.add('show-bubble'); 
+                    // Bubble stays on screen for exactly 3.5 seconds
                     setTimeout(() => {
                         bubble.classList.remove('show-bubble'); 
                         minion.style.transform = "translateX(65px) scaleX(-1)"; 
@@ -283,7 +278,7 @@
                                 minion.style.transform = "translateX(0) scaleX(1)"; 
                             }, 500);
                         }, 500); 
-                    }, 3000); 
+                    }, 3500); 
                 }, 500); 
             }, 300); 
         }
@@ -301,6 +296,10 @@
 
         function doNotOpen() {
             clearInterval(balloonInterval);
+            
+            // Instantly remove all happy red balloons
+            document.querySelectorAll('.happy-balloon').forEach(b => b.remove());
+            
             sadInterval = setInterval(spawnSadEmoji, 700);
             
             document.getElementById('screen1-buttons').style.display = 'none';
@@ -312,6 +311,10 @@
 
         function resetScreen1() {
             clearInterval(sadInterval);
+            
+            // Instantly remove all sad emojis
+            document.querySelectorAll('.sad-emoji').forEach(b => b.remove());
+            
             balloonInterval = setInterval(spawnHappyBalloon, 700);
             
             document.getElementById('screen1-buttons').style.display = 'block';
@@ -324,6 +327,9 @@
         function goToDashboard() {
             clearInterval(balloonInterval);
             clearInterval(sadInterval);
+            
+            // Remove any lingering floating items when she clicks open
+            document.querySelectorAll('.floating-item').forEach(b => b.remove());
 
             let music = document.getElementById('bg-music');
             music.volume = 0.2; 
@@ -340,43 +346,51 @@
         function buildBouquet() {
             let container = document.getElementById('bouquet-photos');
             container.innerHTML = ''; 
-            for(let i=1; i<=20; i++) {
+            
+            // Array of 17 images, exactly skipping number 10
+            const flowerIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18];
+            
+            flowerIndices.forEach(idx => {
                 let rotation = -15 + (Math.random() * 30); 
-                container.innerHTML += `<div class="flower-pic" style="background-image: url('assets/pic${i}.jpg'); background-color: #ddd; transform: rotate(${rotation}deg);"></div>`;
-            }
+                container.innerHTML += `<div class="flower-pic" style="background-image: url('assets/pic${idx}.jpg'); background-color: #ddd; transform: rotate(${rotation}deg);"></div>`;
+            });
         }
 
         function buildAlbumBook() {
             let book = document.getElementById('album-book');
             if(book.innerHTML !== '') return; 
-            let totalPages = 15; 
-            for(let i = 1; i <= totalPages; i++) {
+            
+            // Array of 14 images, exactly skipping number 10
+            const albumIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15];
+            let totalPages = albumIndices.length; 
+            
+            albumIndices.forEach((imgIdx, index) => {
+                let pageNumber = index + 1;
                 let page = document.createElement('div');
                 page.className = 'page';
-                page.style.zIndex = totalPages - i + 1; 
+                page.style.zIndex = totalPages - pageNumber + 1; 
                 page.onclick = function() {
                     if (this.classList.contains('turned')) {
                         this.classList.remove('turned');
-                        setTimeout(() => { this.style.zIndex = totalPages - i + 1; }, 400); 
-                        if(i === 1) book.classList.remove('open'); 
+                        setTimeout(() => { this.style.zIndex = totalPages - pageNumber + 1; }, 400); 
+                        if(pageNumber === 1) book.classList.remove('open'); 
                     } else {
                         this.classList.add('turned');
-                        setTimeout(() => { this.style.zIndex = i; }, 400); 
-                        if(i === 1) book.classList.add('open'); 
-                        // Normal Minion language
+                        setTimeout(() => { this.style.zIndex = pageNumber; }, 400); 
+                        if(pageNumber === 1) book.classList.add('open'); 
                         triggerYay("Next page!");
                     }
                 };
                 let front = document.createElement('div');
                 front.className = 'page-front';
-                front.innerHTML = `<img src="assets/album${i}.jpg" alt="Memory ${i}"><div class="page-text">${i} / 15</div>`;
+                front.innerHTML = `<img src="assets/album${imgIdx}.jpg" alt="Memory ${pageNumber}"><div class="page-text">${pageNumber} / ${totalPages}</div>`;
                 let back = document.createElement('div');
                 back.className = 'page-back';
                 back.innerHTML = `<div style="display:flex; height:100%; align-items:center; justify-content:center; color:#ffb6c1; font-size:30px;">❤️</div>`;
                 page.appendChild(front);
                 page.appendChild(back);
                 book.appendChild(page);
-            }
+            });
         }
 
         function viewOption(num) {
@@ -438,16 +452,15 @@
             document.getElementById('screen2').classList.remove('active');
             document.getElementById('screen3').classList.add('active');
             
-            // Minion screams BANANAAAA before the game starts
+            // Minion screams exactly as requested
             triggerYay("BANANAAAA!!!!!");
             
-            // Starts the game slightly slower and with less collision
             spawnBananas();
         }
 
         function spawnBananas() {
             let gameArea = document.getElementById('screen3');
-            // Changed from 800ms to 1200ms to reduce overlap and frequency
+            // 1.2 seconds between spawns to avoid clutter
             bananaInterval = setInterval(() => {
                 if (bananasCollected >= 19) {
                     clearInterval(bananaInterval);
@@ -459,7 +472,6 @@
                 banana.style.left = Math.random() * 80 + 'vw';
                 banana.style.top = '-50px';
                 
-                // Slowed down falling animation to 5 seconds
                 let animation = banana.animate([{ top: '-50px' }, { top: '80vh' }], { duration: 5000 });
                 
                 banana.onclick = function() {
@@ -468,10 +480,8 @@
                     buildCake();
                     
                     if (bananasCollected === 19) {
-                        clearInterval(bananaInterval); // Stops new bananas instantly
-                        
-                        // Instantly clear all remaining bananas off the screen
-                        document.querySelectorAll('.banana').forEach(b => b.remove());
+                        clearInterval(bananaInterval); // Instantly stop generating
+                        document.querySelectorAll('.banana').forEach(b => b.remove()); // Instantly clear screen
                         
                         triggerYay("You built the cake!");
                         setTimeout(startFinale, 4000);
@@ -567,7 +577,7 @@
                 triggerHeart();
             }, 6800);
 
-            // Show video option 5 seconds after words appeared
+            // Show video option exactly 3 seconds after Happy Birthday appears
             setTimeout(() => {
                 let vidBtn = document.createElement('button');
                 vidBtn.className = 'btn';
@@ -583,8 +593,7 @@
                     vid.play().catch(e => console.log(e));
                 };
                 document.getElementById('screen4').appendChild(vidBtn);
-                triggerYay("I have a video for you!");
-            }, 5000);
+            }, 3000);
         }
     </script>
 </body>
