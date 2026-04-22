@@ -15,6 +15,7 @@
         /* Dashboard Layout */
         .grid { display: grid; grid-template-columns: auto auto; gap: 25px; justify-content: center; z-index: 10; position: relative; margin: 0 auto; }
         .icon { width: 130px; height: 130px; background: #ff69b4; border-radius: 25px; display: flex; align-items: center; justify-content: center; font-size: 65px; cursor: pointer; transition: transform 0.3s, opacity 0.3s; box-shadow: 0 6px 10px rgba(0,0,0,0.15); color: white; z-index: 10; position: relative; }
+        /* Centers the 3rd option below the first two */
         #opt3 { grid-column: 1 / -1; justify-self: center; }
         
         #starting-present { font-size: 100px; cursor: pointer; animation: intenseShake 1.5s infinite; z-index: 50; }
@@ -101,7 +102,7 @@
 
         /* Finale Elements */
         #finale-text { display: none; position: absolute; top: 10%; font-size: 35px; animation: dropDownSlow 3s ease-out forwards; z-index: 10; line-height: 1.2; padding: 15px 30px; margin: 0; }
-        #signature { display: none; position: fixed; bottom: 15px; right: 20px; font-size: 28px; color: #ff1a8c; font-style: italic; opacity: 0; animation: fadeIn 2s forwards; z-index: 100; font-weight: bold; }
+        #signature { display: none; position: fixed; bottom: 15px; right: 20px; font-size: 28px; color: #ff1a8c; font-style: italic; opacity: 0; animation: fadeIn 2s forwards; z-index: 300; font-weight: bold; }
         .candle { width: 10px; height: 35px; background: repeating-linear-gradient(45deg, #fff, #fff 5px, #ff1a8c 5px, #ff1a8c 10px); position: relative; border-radius: 2px; }
         .flame { width: 14px; height: 22px; background: radial-gradient(ellipse at bottom, #fff 10%, #ffcc00 40%, #ff3300 80%); border-radius: 50% 50% 20% 20%; position: absolute; top: -22px; left: -1px; animation: flicker 0.1s infinite alternate; box-shadow: 0 0 10px #ffcc00; transform-origin: bottom center; }
         
@@ -267,7 +268,6 @@
         function openInitialPresent() {
             balloonInterval = setInterval(spawnHappyBalloon, 700);
             
-            // Automatically clear balloons after 30 seconds
             setTimeout(() => {
                 clearInterval(balloonInterval);
             }, 30000);
@@ -276,7 +276,6 @@
             document.getElementById('screen1').classList.add('active');
         }
 
-        // Custom duration added so we can control exactly how long he stays out
         function triggerYay(message, duration = 3500) {
             let minion = document.getElementById('minion-companion');
             let bubble = document.getElementById('speech-bubble');
@@ -288,7 +287,6 @@
                 minion.style.transform = "translateX(65px)"; 
                 setTimeout(() => {
                     bubble.classList.add('show-bubble'); 
-                    // Bubble stays on screen for the specified duration
                     setTimeout(() => {
                         bubble.classList.remove('show-bubble'); 
                         minion.style.transform = "translateX(65px) scaleX(-1)"; 
@@ -304,7 +302,6 @@
             }, 300); 
         }
 
-        // Heart logic: pops out, shows heart for 3 seconds, retreats completely.
         function triggerHeart(duration = 3000) {
             let minion = document.getElementById('minion-companion');
             let door = document.getElementById('door');
@@ -331,8 +328,6 @@
 
         function doNotOpen() {
             clearInterval(balloonInterval);
-            
-            // Instantly remove all happy red balloons
             document.querySelectorAll('.happy-balloon').forEach(b => b.remove());
             
             sadInterval = setInterval(spawnSadEmoji, 700);
@@ -346,8 +341,6 @@
 
         function resetScreen1() {
             clearInterval(sadInterval);
-            
-            // Instantly remove all sad emojis
             document.querySelectorAll('.sad-emoji').forEach(b => b.remove());
             
             balloonInterval = setInterval(spawnHappyBalloon, 700);
@@ -362,8 +355,6 @@
         function goToDashboard() {
             clearInterval(balloonInterval);
             clearInterval(sadInterval);
-            
-            // Remove any lingering floating items when she clicks open
             document.querySelectorAll('.floating-item').forEach(b => b.remove());
 
             let music = document.getElementById('bg-music');
@@ -413,7 +404,6 @@
                         this.classList.add('turned');
                         setTimeout(() => { this.style.zIndex = pageNumber; }, 400); 
                         if(pageNumber === 1) book.classList.add('open'); 
-                        triggerYay("Next page!");
                     }
                 };
                 let front = document.createElement('div');
@@ -433,14 +423,6 @@
             document.getElementById('opt' + num).classList.remove('shaking-option');
             document.getElementById('opt' + num).classList.add('viewed');
             
-            // Minion announces what she just opened
-            let openMessages = {
-                1: "Beautiful flowers for you! 🌸",
-                2: "Look at our memories! 📸",
-                3: "A special letter just for you! 💌"
-            };
-            if(!viewed[num]) triggerYay(openMessages[num]);
-            
             setTimeout(() => {
                 if(num === 1) buildBouquet();
                 if(num === 2) buildAlbumBook(); 
@@ -451,6 +433,15 @@
 
         function closeModal(num) {
             document.getElementById('modal-' + num).style.display = 'none';
+            
+            let minionMessages = {
+                1: "I hope you loved the flowers! 🌸",
+                2: "Such beautiful memories! 📸",
+                3: "Written with all my heart! 💌"
+            };
+            // Minion talks when she closes the modal
+            triggerYay(minionMessages[num]);
+            
             viewed[num] = true;
 
             let nextNum = num + 1;
@@ -520,7 +511,6 @@
                         clearInterval(bananaInterval); 
                         document.querySelectorAll('.banana').forEach(b => b.remove());
                         
-                        triggerYay("You built the cake!");
                         setTimeout(startFinale, 4000);
                     }
                 };
@@ -597,16 +587,12 @@
         }
 
         function triggerWin() {
-            // Hides ONLY the flames, leaving the candle sticks on the cake!
             let flames = document.querySelectorAll('.flame');
             flames.forEach(f => f.style.display = 'none');
             
             document.getElementById('mic-instruction').style.display = 'none';
             
-            // Drop the pink Happy Birthday bubble
             document.getElementById('finale-text').style.display = 'inline-block';
-            
-            // Show Signature in bottom right corner
             document.getElementById('signature').style.display = 'block';
             
             let duration = 30 * 1000;
@@ -619,15 +605,15 @@
                 requestAnimationFrame(frame);
             }());
             
-            // Minion screams exactly for 3000 milliseconds (3 seconds) then runs completely inside
-            triggerYay("HAPPY BIRTHDAY ALICIA!!!!", 3000);
+            // Screams exactly for 2000 milliseconds (2 seconds) then runs inside
+            triggerYay("HAPPY BIRTHDAY ALICIA!!!!", 2000);
 
-            // Comes out with the heart exactly after finishing his previous loop, holds for 3 seconds, runs back
+            // Comes out with the heart safely after finishing his previous animation loop (4500ms)
             setTimeout(() => {
                 triggerHeart(3000);
-            }, 5500);
+            }, 4500);
 
-            // Shows the gift video icon at T=3 seconds after the Happy Birthday text drops
+            // Show gift video icon exactly 3 seconds after Happy Birthday appears
             setTimeout(() => {
                 document.getElementById('gift-video-btn').style.display = 'block';
             }, 3000);
