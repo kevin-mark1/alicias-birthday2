@@ -80,6 +80,8 @@
         #speech-bubble { background: white; border-radius: 15px; padding: 8px 15px; position: absolute; bottom: 65px; left: 75px; font-weight: bold; color: #ff1a8c; opacity: 0; transition: opacity 0.3s; z-index: 4; box-shadow: 0 2px 4px rgba(0,0,0,0.2); width: max-content; max-width: 150px; text-align: center; pointer-events: none; }
         #speech-bubble::after { content: ''; position: absolute; bottom: -8px; left: 15px; border-width: 8px 8px 0; border-style: solid; border-color: white transparent transparent transparent; }
         .show-bubble { opacity: 1 !important; }
+        #minion-heart { position: absolute; bottom: 20px; left: 80px; font-size: 40px; opacity: 0; transition: opacity 1s, transform 1s; z-index: 5; pointer-events: none; }
+        .show-heart { opacity: 1 !important; transform: translateY(-60px) scale(1.5); }
 
         /* Dynamic Chocolate Cake Building Game */
         #fifth-icon { display: none; background: #ff3333; margin-top: 20px; z-index: 10; position: relative; }
@@ -136,6 +138,7 @@
         <div id="door"></div>
         <img id="minion-companion" src="assets/minion-companion.png" alt="Minion">
         <div id="speech-bubble"></div>
+        <div id="minion-heart">❤️</div>
     </div>
 
     <div id="screen1" class="screen">
@@ -228,6 +231,8 @@
         
         <div id="gift-video-btn" class="gift-btn" onclick="openVideo()">🎁</div>
         
+        <p id="mic-instruction" style="color: #cc0066; font-weight: bold; margin-top: 20px; z-index: 10; position: relative;">Blow into your microphone to put out the candles!</p>
+        
         <div id="signature">from Kevin ❤️</div>
     </div>
 
@@ -262,6 +267,12 @@
 
         function openInitialPresent() {
             balloonInterval = setInterval(spawnHappyBalloon, 700);
+            
+            // Automatically clear balloons after 30 seconds
+            setTimeout(() => {
+                clearInterval(balloonInterval);
+            }, 30000);
+
             document.getElementById('screen0').classList.remove('active');
             document.getElementById('screen1').classList.add('active');
         }
@@ -291,6 +302,17 @@
                     }, 3500); 
                 }, 500); 
             }, 300); 
+        }
+
+        function triggerHeart() {
+            let minion = document.getElementById('minion-companion');
+            let door = document.getElementById('door');
+            let heart = document.getElementById('minion-heart');
+            door.style.transform = "rotateY(-100deg)";
+            setTimeout(() => {
+                minion.style.transform = "translateX(65px)";
+                setTimeout(() => { heart.classList.add('show-heart'); }, 500);
+            }, 300);
         }
 
         function doNotOpen() {
@@ -346,13 +368,11 @@
             let container = document.getElementById('bouquet-photos');
             container.innerHTML = ''; 
             
-            // Array of 17 images, exactly skipping number 10
-            const flowerIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18];
-            
-            flowerIndices.forEach(idx => {
+            // Includes 10 now, up to 17
+            for(let i=1; i<=17; i++) {
                 let rotation = -15 + (Math.random() * 30); 
-                container.innerHTML += `<div class="flower-pic" style="background-image: url('assets/pic${idx}.jpg'); background-color: #ddd; transform: rotate(${rotation}deg);"></div>`;
-            });
+                container.innerHTML += `<div class="flower-pic" style="background-image: url('assets/pic${i}.jpg'); background-color: #ddd; transform: rotate(${rotation}deg);"></div>`;
+            }
         }
 
         function buildAlbumBook() {
@@ -408,6 +428,7 @@
         function closeModal(num) {
             document.getElementById('modal-' + num).style.display = 'none';
             
+            // Plain English Messages
             let minionMessages = {
                 1: "Beautiful flowers for you! 🌸",
                 2: "Look at our memories! 📸",
@@ -564,8 +585,11 @@
         }
 
         function triggerWin() {
+            // Hides ONLY the flames, leaving the candle sticks on the cake!
             let flames = document.querySelectorAll('.flame');
             flames.forEach(f => f.style.display = 'none');
+            
+            document.getElementById('mic-instruction').style.display = 'none';
             
             // Drop the pink Happy Birthday bubble
             document.getElementById('finale-text').style.display = 'inline-block';
