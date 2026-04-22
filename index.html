@@ -132,8 +132,7 @@
         <div class="grid">
             <div class="icon" id="opt1" onclick="viewOption(1)">🌸</div>
             <div class="icon locked" id="opt2" onclick="viewOption(2)">📸</div>
-            <div class="icon locked" id="opt3" onclick="viewOption(3)">🎥</div>
-            <div class="icon locked" id="opt4" onclick="viewOption(4)">💌</div>
+            <div class="icon locked" id="opt3" onclick="viewOption(3)">💌</div>
         </div>
         <div style="display: flex; justify-content: center; width: 100%;">
             <div class="icon" id="fifth-icon" onclick="startBananaGame()" style="width: 130px; height: 130px; font-size: 65px; border-radius: 25px;">🍌</div>
@@ -158,14 +157,6 @@
 
     <div id="modal-3" class="option-modal">
         <button class="back-btn" onclick="closeModal(3)">← Back</button>
-        <h2 style="margin-bottom: 20px;">A Special Message</h2>
-        <video id="minion-vid" width="90%" style="max-width: 400px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);" controls playsinline>
-            <source src="assets/minion-happy.mp4" type="video/mp4">
-        </video>
-    </div>
-
-    <div id="modal-4" class="option-modal">
-        <button class="back-btn" onclick="closeModal(4)">← Back</button>
         <div class="letter-paper">
             <div class="letter-content">
                 <p>My dearest Alicia,</p>
@@ -180,6 +171,14 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div id="modal-video" class="option-modal">
+        <button class="back-btn" onclick="closeVideoModal()">← Back</button>
+        <h2 style="margin-bottom: 20px;">A Special Message</h2>
+        <video id="minion-vid" width="90%" style="max-width: 400px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);" controls playsinline>
+            <source src="assets/minion-happy.mp4" type="video/mp4">
+        </video>
     </div>
 
     <div id="screen3" class="screen">
@@ -209,25 +208,42 @@
     </div>
 
     <script>
-        let unlocked = { 1: true, 2: false, 3: false, 4: false }; 
-        let viewed = { 1: false, 2: false, 3: false, 4: false };   
+        let unlocked = { 1: true, 2: false, 3: false }; 
+        let viewed = { 1: false, 2: false, 3: false };   
         let bananasCollected = 0;
+        let balloonInterval;
+        let balloonTimeout;
 
         function openInitialPresent() {
-            for(let i=0; i<10; i++) {
+            // Balloons spawn for 30 seconds
+            balloonInterval = setInterval(() => {
                 let balloon = document.createElement('div');
                 balloon.className = 'balloon';
                 balloon.innerText = '🎈';
                 balloon.style.left = Math.random() * 90 + 'vw';
                 balloon.style.animationDuration = (Math.random() * 2 + 3) + 's';
                 document.body.appendChild(balloon);
-                setTimeout(() => balloon.remove(), 5000);
-            }
+                setTimeout(() => { if(balloon.parentNode) balloon.remove(); }, 5000);
+            }, 700);
+
+            balloonTimeout = setTimeout(() => {
+                clearInterval(balloonInterval);
+            }, 30000);
+
             document.getElementById('screen0').classList.remove('active');
             document.getElementById('screen1').classList.add('active');
         }
 
         function triggerYay(message) {
+            // Minion Voice Add-on
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); 
+                const utterance = new SpeechSynthesisUtterance(message);
+                utterance.pitch = 2.0; 
+                utterance.rate = 1.3;  
+                window.speechSynthesis.speak(utterance);
+            }
+
             let minion = document.getElementById('minion-companion');
             let bubble = document.getElementById('speech-bubble');
             let door = document.getElementById('door');
@@ -276,6 +292,10 @@
         }
 
         function goToDashboard() {
+            // Clear balloons if she taps the Open option
+            clearInterval(balloonInterval);
+            clearTimeout(balloonTimeout);
+
             let music = document.getElementById('bg-music');
             music.volume = 0.2; 
             music.play().catch(e => console.log("Audio blocked by browser auto-play policy."));
@@ -285,14 +305,14 @@
             document.getElementById('companion-area').style.display = 'flex';
             document.getElementById('opt1').classList.add('shaking-option');
             
-            // Minion greets her upon entering the dashboard
             triggerYay("Bello Alicia!");
         }
 
         function buildBouquet() {
             let container = document.getElementById('bouquet-photos');
             container.innerHTML = ''; 
-            for(let i=1; i<=10; i++) {
+            // Changed to 20 flowers
+            for(let i=1; i<=20; i++) {
                 let rotation = -15 + (Math.random() * 30); 
                 container.innerHTML += `<div class="flower-pic" style="background-image: url('assets/pic${i}.jpg'); background-color: #ddd; transform: rotate(${rotation}deg);"></div>`;
             }
@@ -301,7 +321,7 @@
         function buildAlbumBook() {
             let book = document.getElementById('album-book');
             if(book.innerHTML !== '') return; 
-            let totalPages = 9; // Updated to 9 pages
+            let totalPages = 15; // Changed to 15 Pages
             for(let i = 1; i <= totalPages; i++) {
                 let page = document.createElement('div');
                 page.className = 'page';
@@ -319,7 +339,7 @@
                 };
                 let front = document.createElement('div');
                 front.className = 'page-front';
-                front.innerHTML = `<img src="assets/album${i}.jpg" alt="Memory ${i}"><div class="page-text">${i} / 9</div>`;
+                front.innerHTML = `<img src="assets/album${i}.jpg" alt="Memory ${i}"><div class="page-text">${i} / 15</div>`;
                 let back = document.createElement('div');
                 back.className = 'page-back';
                 back.innerHTML = `<div style="display:flex; height:100%; align-items:center; justify-content:center; color:#ffb6c1; font-size:30px;">❤️</div>`;
@@ -337,11 +357,7 @@
             setTimeout(() => {
                 if(num === 1) buildBouquet();
                 if(num === 2) buildAlbumBook(); 
-                if(num === 3) {
-                    let vid = document.getElementById('minion-vid');
-                    vid.currentTime = 0; 
-                    vid.play().catch(e => console.log("Video auto-play blocked by browser."));
-                }
+                // Video is no longer handled here
                 
                 document.getElementById('modal-' + num).style.display = 'flex';
             }, 100); 
@@ -349,16 +365,11 @@
 
         function closeModal(num) {
             document.getElementById('modal-' + num).style.display = 'none';
-            if(num === 3) {
-                document.getElementById('minion-vid').pause();
-            }
             
-            // Minion talks ONLY when backing out of an option
             let minionMessages = {
                 1: "Ooo, Pwede na! 🌸",
                 2: "Papoy! 📸",
-                3: "Bello, Para tu! 🎥",
-                4: "Tulaliloo ti amo! 💌"
+                3: "Tulaliloo ti amo! 💌"
             };
             if(!viewed[num]) {
                 triggerYay(minionMessages[num]);
@@ -367,7 +378,8 @@
             viewed[num] = true;
 
             let nextNum = num + 1;
-            if (nextNum <= 4 && !unlocked[nextNum]) {
+            // Now checks up to 3 (since video is removed from dashboard)
+            if (nextNum <= 3 && !unlocked[nextNum]) {
                 unlocked[nextNum] = true;
                 let nextBtn = document.getElementById('opt' + nextNum);
                 nextBtn.classList.remove('locked');
@@ -377,7 +389,7 @@
                     nextBtn.classList.add('shaking-option');
                 }, 600); 
             }
-            if (viewed[1] && viewed[2] && viewed[3] && viewed[4]) {
+            if (viewed[1] && viewed[2] && viewed[3]) {
                 let fifth = document.getElementById('fifth-icon');
                 fifth.style.display = 'flex';
                 fifth.classList.add('slide-up-anim');
@@ -386,6 +398,11 @@
                     fifth.classList.add('shaking-option');
                 }, 800);
             }
+        }
+
+        function closeVideoModal() {
+            document.getElementById('modal-video').style.display = 'none';
+            document.getElementById('minion-vid').pause();
         }
 
         function startBananaGame() {
@@ -410,10 +427,8 @@
                     bananasCollected++;
                     buildCake();
                     
-                    // Minion praises her at the end of the game
                     if (bananasCollected === 19) {
                         triggerYay("Nice Work!");
-                        // Wait for minion animation to finish before jumping screens
                         setTimeout(startFinale, 5000);
                     }
                 };
@@ -426,7 +441,6 @@
             let piece = document.createElement('div');
             piece.className = 'cake-piece';
             
-            // Dynamic width to create a tiered cake look
             let width = '100%';
             if (bananasCollected >= 15) width = '60%';
             else if (bananasCollected >= 8) width = '80%';
@@ -434,7 +448,6 @@
             piece.style.width = width;
             piece.style.height = (100 / 19) + '%';
             
-            // Frosting lines
             if (bananasCollected === 19 || bananasCollected === 14 || bananasCollected === 7) {
                 piece.style.borderTop = '4px solid #fff';
             } else {
@@ -498,13 +511,30 @@
                 requestAnimationFrame(frame);
             }());
             
-            // Finale Minion Routine
             triggerYay("HAPPY BIRTHDAYYY!!!!");
             
-            // Wait 6.8 seconds (4.8s for triggerYay to finish + 2s wait inside) then come out with heart
             setTimeout(() => {
                 triggerHeart();
             }, 6800);
+
+            // Show video option exactly 5 seconds after Happy Birthday appears
+            setTimeout(() => {
+                let vidBtn = document.createElement('button');
+                vidBtn.className = 'btn';
+                vidBtn.innerText = 'Watch Video 🎥';
+                vidBtn.style.position = 'relative';
+                vidBtn.style.zIndex = '30';
+                vidBtn.style.marginTop = '30px';
+                vidBtn.style.animation = 'fadeIn 1s forwards';
+                vidBtn.onclick = function() {
+                    document.getElementById('modal-video').style.display = 'flex';
+                    let vid = document.getElementById('minion-vid');
+                    vid.currentTime = 0;
+                    vid.play().catch(e => console.log(e));
+                };
+                document.getElementById('screen4').appendChild(vidBtn);
+                triggerYay("I have a video for you!");
+            }, 5000);
         }
     </script>
 </body>
