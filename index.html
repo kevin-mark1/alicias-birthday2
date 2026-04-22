@@ -15,7 +15,6 @@
         /* Dashboard Layout */
         .grid { display: grid; grid-template-columns: auto auto; gap: 25px; justify-content: center; z-index: 10; position: relative; margin: 0 auto; }
         .icon { width: 130px; height: 130px; background: #ff69b4; border-radius: 25px; display: flex; align-items: center; justify-content: center; font-size: 65px; cursor: pointer; transition: transform 0.3s, opacity 0.3s; box-shadow: 0 6px 10px rgba(0,0,0,0.15); color: white; z-index: 10; position: relative; }
-        /* Centers the 3rd option below the first two */
         #opt3 { grid-column: 1 / -1; justify-self: center; }
         
         #starting-present { font-size: 100px; cursor: pointer; animation: intenseShake 1.5s infinite; z-index: 50; }
@@ -71,8 +70,8 @@
         .letter-content p { margin-bottom: 15px; }
         .letter-signature { margin-top: 25px; font-style: italic; font-weight: bold; color: #ff1a8c; font-size: 18px; text-align: right; }
 
-        /* Minion Companion UI */
-        #companion-area { position: fixed; bottom: 0; left: 10px; z-index: 100; display: none; align-items: flex-end; height: 120px; width: 150px; perspective: 600px; }
+        /* Minion Companion UI - POPPED TO FRONT OVER MODALS */
+        #companion-area { position: fixed; bottom: 0; left: 10px; z-index: 250; display: none; align-items: flex-end; height: 120px; width: 150px; perspective: 600px; }
         #door-frame { position: absolute; bottom: 0; left: 0; width: 60px; height: 90px; background: #3d1c04; border-radius: 10px 10px 0 0; z-index: 1; }
         #door { width: 60px; height: 90px; background: #8B4513; border: 3px solid #5C2E0B; border-bottom: none; border-radius: 10px 10px 0 0; position: absolute; bottom: 0; left: 0; z-index: 3; transform-origin: left; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
         #door::after { content: ''; position: absolute; right: 8px; top: 45px; width: 10px; height: 10px; background: #FFD700; border-radius: 50%; box-shadow: inset -2px -2px 4px rgba(0,0,0,0.3); }
@@ -277,7 +276,8 @@
             document.getElementById('screen1').classList.add('active');
         }
 
-        function triggerYay(message) {
+        // Custom duration added so we can control exactly how long he speaks
+        function triggerYay(message, duration = 3500) {
             let minion = document.getElementById('minion-companion');
             let bubble = document.getElementById('speech-bubble');
             let door = document.getElementById('door');
@@ -288,7 +288,7 @@
                 minion.style.transform = "translateX(65px)"; 
                 setTimeout(() => {
                     bubble.classList.add('show-bubble'); 
-                    // Bubble stays on screen for exactly 3.5 seconds
+                    // Bubble stays on screen for the specified duration
                     setTimeout(() => {
                         bubble.classList.remove('show-bubble'); 
                         minion.style.transform = "translateX(65px) scaleX(-1)"; 
@@ -299,7 +299,7 @@
                                 minion.style.transform = "translateX(0) scaleX(1)"; 
                             }, 500);
                         }, 500); 
-                    }, 3500); 
+                    }, duration); 
                 }, 500); 
             }, 300); 
         }
@@ -368,19 +368,21 @@
             let container = document.getElementById('bouquet-photos');
             container.innerHTML = ''; 
             
-            // Includes 10 now, up to 17
-            for(let i=1; i<=17; i++) {
+            // 17 images exactly: 1-9, 11-18 (skipping 10)
+            const flowerIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18];
+            
+            flowerIndices.forEach(idx => {
                 let rotation = -15 + (Math.random() * 30); 
-                container.innerHTML += `<div class="flower-pic" style="background-image: url('assets/pic${i}.jpg'); background-color: #ddd; transform: rotate(${rotation}deg);"></div>`;
-            }
+                container.innerHTML += `<div class="flower-pic" style="background-image: url('assets/pic${idx}.jpg'); background-color: #ddd; transform: rotate(${rotation}deg);"></div>`;
+            });
         }
 
         function buildAlbumBook() {
             let book = document.getElementById('album-book');
             if(book.innerHTML !== '') return; 
             
-            // Array of 14 images, exactly skipping number 10
-            const albumIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15];
+            // 15 images exactly: 1-9, 11-15, and replacing 10 with a duplicate of 2 at the end
+            const albumIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 2];
             let totalPages = albumIndices.length; 
             
             albumIndices.forEach((imgIdx, index) => {
@@ -417,6 +419,14 @@
             document.getElementById('opt' + num).classList.remove('shaking-option');
             document.getElementById('opt' + num).classList.add('viewed');
             
+            // Minion announces what she just opened
+            let openMessages = {
+                1: "Beautiful flowers for you! 🌸",
+                2: "Look at our memories! 📸",
+                3: "A special letter just for you! 💌"
+            };
+            if(!viewed[num]) triggerYay(openMessages[num]);
+            
             setTimeout(() => {
                 if(num === 1) buildBouquet();
                 if(num === 2) buildAlbumBook(); 
@@ -427,17 +437,6 @@
 
         function closeModal(num) {
             document.getElementById('modal-' + num).style.display = 'none';
-            
-            // Plain English Messages
-            let minionMessages = {
-                1: "Beautiful flowers for you! 🌸",
-                2: "Look at our memories! 📸",
-                3: "A special letter just for you! 💌"
-            };
-            if(!viewed[num]) {
-                triggerYay(minionMessages[num]);
-            }
-            
             viewed[num] = true;
 
             let nextNum = num + 1;
@@ -548,7 +547,6 @@
             document.getElementById('screen3').classList.remove('active');
             document.getElementById('screen4').classList.add('active');
             
-            // Reattach mic if skipped
             try {
                 listenToMicrophone();
             } catch(e) {
@@ -607,7 +605,13 @@
                 requestAnimationFrame(frame);
             }());
             
-            triggerYay("Happy Birthday Alicia!");
+            // Screams exactly for 2000 milliseconds (2 seconds) then runs inside
+            triggerYay("HAPPY BIRTHDAY ALICIA!!!!", 2000);
+
+            // Comes out with the heart safely after finishing his previous animation loop (4500ms)
+            setTimeout(() => {
+                triggerHeart();
+            }, 4500);
 
             // Show gift video icon exactly 3 seconds after Happy Birthday appears
             setTimeout(() => {
