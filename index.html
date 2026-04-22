@@ -276,6 +276,7 @@
             document.getElementById('screen1').classList.add('active');
         }
 
+        // Custom duration added so we can control exactly how long he stays out
         function triggerYay(message, duration = 3500) {
             let minion = document.getElementById('minion-companion');
             let bubble = document.getElementById('speech-bubble');
@@ -287,6 +288,7 @@
                 minion.style.transform = "translateX(65px)"; 
                 setTimeout(() => {
                     bubble.classList.add('show-bubble'); 
+                    // Bubble stays on screen for the specified duration
                     setTimeout(() => {
                         bubble.classList.remove('show-bubble'); 
                         minion.style.transform = "translateX(65px) scaleX(-1)"; 
@@ -336,7 +338,7 @@
             document.getElementById('sad-minion-container').style.display = 'block';
             document.getElementById('screen1-back-btn').style.display = 'block';
             
-            triggerYay("Oh no! Please open it!");
+            triggerYay("Oh no! Please open it!", 2500);
         }
 
         function resetScreen1() {
@@ -349,7 +351,7 @@
             document.getElementById('sad-minion-container').style.display = 'none';
             document.getElementById('screen1-back-btn').style.display = 'none';
             
-            triggerYay("Yay! You came back!");
+            triggerYay("Yay! You came back!", 2500);
         }
 
         function goToDashboard() {
@@ -366,7 +368,7 @@
             document.getElementById('companion-area').style.display = 'flex';
             document.getElementById('opt1').classList.add('shaking-option');
             
-            triggerYay("Bello Alicia!");
+            triggerYay("Bello Alicia!", 3500);
         }
 
         function buildBouquet() {
@@ -433,16 +435,16 @@
 
         function closeModal(num) {
             document.getElementById('modal-' + num).style.display = 'none';
-            
+            viewed[num] = true;
+
             let minionMessages = {
                 1: "I hope you loved the flowers! 🌸",
                 2: "Such beautiful memories! 📸",
                 3: "Written with all my heart! 💌"
             };
-            // Minion talks when she closes the modal
-            triggerYay(minionMessages[num]);
             
-            viewed[num] = true;
+            // Minion pops out ONLY when she taps back, holding message for exactly 2.5 seconds
+            triggerYay(minionMessages[num], 2500);
 
             let nextNum = num + 1;
             if (nextNum <= 3 && !unlocked[nextNum]) {
@@ -482,7 +484,7 @@
             document.getElementById('screen2').classList.remove('active');
             document.getElementById('screen3').classList.add('active');
             
-            triggerYay("BANANAAAA!!!!!");
+            triggerYay("BANANAAAA!!!!!", 3500);
             
             spawnBananas();
         }
