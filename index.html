@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Alicia!</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        /* Base Styling */
+        body { font-family: Arial, sans-serif; text-align: center; background: #ffb6c1; margin: 0; overflow: hidden; }
+        .screen { display: none; height: 100vh; width: 100vw; flex-direction: column; justify-content: center; align-items: center; }
+        .active { display: flex; }
+        .btn { padding: 15px 30px; margin: 10px; font-size: 18px; border: none; border-radius: 10px; cursor: pointer; background: #ff1a8c; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .grid { display: grid; grid-template-columns: auto auto; gap: 25px; justify-content: center; z-index: 10; position: relative; margin: 0 auto; }
+        .icon { width: 130px; height: 130px; background: #ff69b4; border-radius: 25px; display: flex; align-items: center; justify-content: center; font-size: 65px; cursor: pointer; transition: transform 0.3s, opacity 0.3s; box-shadow: 0 6px 10px rgba(0,0,0,0.15); color: white; z-index: 10; position: relative; }
+        #starting-present { font-size: 100px; cursor: pointer; animation: intenseShake 1.5s infinite; z-index: 50; }
+        
+        /* Lock States and Animations */
+        .locked { opacity: 0.4; filter: grayscale(100%); cursor: not-allowed; pointer-events: none; box-shadow: none; background: #999; }
+        .viewed { transform: scale(0.95) !important; opacity: 0.8; }
+        .unlock-anim { animation: unlockPop 0.6s ease-out forwards; }
+        .shaking-option { animation: mildShake 2s infinite; }
+        .slide-up-anim { animation: slideUp 0.8s ease-out forwards; }
+
+        /* Full-Screen Option Modals */
+        .option-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 200; flex-direction: column; justify-content: center; align-items: center; color: white; }
+        .back-btn { position: absolute; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.2); border: 2px solid white; color: white; border-radius: 20px; padding: 8px 15px; font-size: 16px; cursor: pointer; z-index: 300; font-weight: bold; backdrop-filter: blur(5px); }
+
+        /* Bouquet */
+        .bouquet-cluster { display: flex; flex-wrap: wrap; justify-content: center; width: 350px; position: relative; z-index: 2; padding: 10px; margin-bottom: -15px;}
+        .flower-pic { width: 100px; height: 100px; background: #fff; border: 4px solid white; box-shadow: 0 3px 6px rgba(0,0,0,0.5); margin: -10px; border-radius: 12px; background-size: cover; background-position: center; }
+        .stem-container { width: 20px; height: 80px; background: #228B22; margin: 0 auto; border-radius: 0 0 10px 10px; position: relative; z-index: 1; display: flex; justify-content: center; align-items: center; box-shadow: inset 3px 0 6px rgba(0,0,0,0.2); }
+        .bow { width: 50px; height: 15px; background: #ff1a8c; position: absolute; top: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+
+        /* 3D Photo Album Book */
+        .book-wrapper { perspective: 1200px; margin-top: 20px; width: 100%; display: flex; justify-content: center; }
+        .book { width: 160px; height: 240px; position: relative; transform-style: preserve-3d; transform: translateX(80px); transition: transform 0.6s ease-in-out; }
+        .book.open { transform: translateX(0); } 
+        .page { width: 100%; height: 100%; position: absolute; top: 0; left: 0; transform-origin: left center; transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1); transform-style: preserve-3d; background: white; border-radius: 2px 10px 10px 2px; box-shadow: inset 3px 0 10px rgba(0,0,0,0.1), 3px 3px 10px rgba(0,0,0,0.2); cursor: pointer; }
+        .page.turned { transform: rotateY(-180deg); }
+        .page-front, .page-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 2px 10px 10px 2px; overflow: hidden; background: white; }
+        .page-back { transform: rotateY(180deg); background: #fdfdfd; border-radius: 10px 2px 2px 10px; } 
+        .page-front img { width: 90%; height: 85%; object-fit: cover; margin: 5% auto 0 auto; display: block; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .page-text { font-size: 14px; color: #cc0066; font-weight: bold; margin-top: 5px; }
+
+        /* Letter Stationery */
+        .letter-paper { background: #fff; width: 90%; max-width: 500px; height: 70vh; margin-top: 40px; border-radius: 15px; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow-y: auto; text-align: left; padding: 20px; }
+        .letter-paper::before { content: '🌸🌺🌻🌼'; font-size: 24px; position: absolute; top: -15px; left: 10px; z-index: 10; }
+        .letter-paper::after { content: '🌼🌻🌺🌸'; font-size: 24px; position: absolute; bottom: -15px; right: 10px; z-index: 10; }
+        .letter-content { color: #cc0066; line-height: 1.6; font-size: 16px; padding: 10px 15px; }
+        .letter-content p { margin-bottom: 15px; }
+        .letter-signature { margin-top: 25px; font-style: italic; font-weight: bold; color: #ff1a8c; font-size: 18px; text-align: right; }
+
+        /* Minion Companion UI */
+        #companion-area { position: fixed; bottom: 0; left: 10px; z-index: 100; display: none; align-items: flex-end; height: 120px; width: 150px; perspective: 600px; }
+        #door-frame { position: absolute; bottom: 0; left: 0; width: 60px; height: 90px; background: #3d1c04; border-radius: 10px 10px 0 0; z-index: 1; }
+        #door { width: 60px; height: 90px; background: #8B4513; border: 3px solid #5C2E0B; border-bottom: none; border-radius: 10px 10px 0 0; position: absolute; bottom: 0; left: 0; z-index: 3; transform-origin: left; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        #door::after { content: ''; position: absolute; right: 8px; top: 45px; width: 10px; height: 10px; background: #FFD700; border-radius: 50%; box-shadow: inset -2px -2px 4px rgba(0,0,0,0.3); }
+        #minion-companion { width: 50px; position: absolute; left: 5px; bottom: 0; z-index: 2; transition: transform 0.4s ease-in-out; image-rendering: pixelated; }
+        #speech-bubble { background: white; border-radius: 15px; padding: 8px 15px; position: absolute; bottom: 65px; left: 75px; font-weight: bold; color: #ff1a8c; opacity: 0; transition: opacity 0.3s; z-index: 4; box-shadow: 0 2px 4px rgba(0,0,0,0.2); width: max-content; max-width: 150px; text-align: center; pointer-events: none; }
+        #speech-bubble::after { content: ''; position: absolute; bottom: -8px; left: 15px; border-width: 8px 8px 0; border-style: solid; border-color: white transparent transparent transparent; }
+        .show-bubble { opacity: 1 !important; }
+        #minion-heart { position: absolute; bottom: 20px; left: 80px; font-size: 40px; opacity: 0; transition: opacity 1s, transform 1s; z-index: 5; pointer-events: none; }
+        .show-heart { opacity: 1 !important; transform: translateY(-60px) scale(1.5); }
+
+        /* Dynamic Cake Building Game */
+        #fifth-icon { display: none; background: #ff3333; margin-top: 20px; z-index: 10; position: relative; }
+        #cake-container { width: 200px; height: 200px; margin-top: 20px; display: flex; flex-direction: column-reverse; align-items: center; z-index: 10; position: relative; }
+        .cake-piece { background: #f4d03f; box-sizing: border-box; animation: dropPiece 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; margin: 0 auto; box-shadow: inset 0 -3px 5px rgba(0,0,0,0.15); }
+        .balloon, .banana { position: absolute; bottom: -100px; font-size: 80px; cursor: pointer; animation: floatUp 5s linear infinite; z-index: 20; }
+        
+        /* Realistic Finale Cake */
+        .realistic-cake { position: relative; display: flex; flex-direction: column; align-items: center; z-index: 10; margin-top: 30px; }
+        .tier { background: #f4d03f; border-top: 5px solid #fff; box-shadow: inset 0 -5px 10px rgba(0,0,0,0.1); position: relative; }
+        .tier::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 8px; background: #fff; border-radius: 0 0 5px 5px; }
+        .top-tier { width: 100px; height: 40px; border-radius: 10px 10px 0 0; }
+        .mid-tier { width: 140px; height: 50px; border-radius: 5px 5px 0 0; }
+        .bot-tier { width: 180px; height: 60px; border-radius: 5px 5px 10px 10px; border-bottom: 5px solid #cc0066; }
+
+        /* Finale Elements */
+        #finale-text { display: none; position: absolute; top: 10%; font-size: 45px; font-weight: bold; color: #ff007f; animation: dropDownSlow 3s ease-out forwards; text-shadow: 2px 2px 4px rgba(255,255,255,0.7); z-index: 10; line-height: 1.2; padding: 0 20px; }
+        #signature { display: none; position: absolute; bottom: 10%; right: 10%; font-size: 30px; color: #cc0066; animation: fadeIn 2s forwards; font-style: italic; z-index: 10; }
+        .candle { width: 10px; height: 35px; background: repeating-linear-gradient(45deg, #fff, #fff 5px, #ff1a8c 5px, #ff1a8c 10px); position: relative; border-radius: 2px; }
+        .flame { width: 14px; height: 22px; background: radial-gradient(ellipse at bottom, #fff 10%, #ffcc00 40%, #ff3300 80%); border-radius: 50% 50% 20% 20%; position: absolute; top: -22px; left: -1px; animation: flicker 0.1s infinite alternate; box-shadow: 0 0 10px #ffcc00; transform-origin: bottom center; }
+        
+        /* Keyframes */
+        @keyframes floatUp { to { bottom: 110vh; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes dropDownSlow { from { top: -200px; opacity: 0; } to { top: 10%; opacity: 1; } }
+        @keyframes intenseShake { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(10deg) scale(1.1); } 75% { transform: rotate(-10deg) scale(1.1); } }
+        @keyframes mildShake { 0%, 100% { transform: rotate(0deg); } 10% { transform: rotate(8deg); } 20% { transform: rotate(-8deg); } 30% { transform: rotate(0deg); } }
+        @keyframes unlockPop { 0% { transform: scale(1); filter: grayscale(100%); background: #999; } 50% { transform: scale(1.2); filter: grayscale(0%); background: #fff; box-shadow: 0 0 15px #fff; } 100% { transform: scale(1); filter: grayscale(0%); background: #ff69b4; } }
+        @keyframes slideUp { from { transform: translateY(200px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes dropPiece { 0% { transform: translateY(-500px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+        @keyframes flicker { 0% { transform: scale(1) rotate(-2deg); opacity: 0.9; } 100% { transform: scale(1.1) rotate(2deg); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" loop>
+        <source src="assets/rain-dance.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="screen0" class="screen active">
+        <h2 style="color: #cc0066; margin-bottom: 40px;">Tap to Open!</h2>
+        <div id="starting-present" onclick="openInitialPresent()">🎁</div>
+    </div>
+
+    <div id="companion-area">
+        <div id="door-frame"></div>
+        <div id="door"></div>
+        <img id="minion-companion" src="assets/minion-companion.png" alt="Minion">
+        <div id="speech-bubble"></div>
+        <div id="minion-heart">❤️</div>
+    </div>
+
+    <div id="screen1" class="screen">
+        <button id="screen1-back-btn" class="back-btn" onclick="resetScreen1()" style="display: none; color: #cc0066; border-color: #cc0066; background: rgba(255,255,255,0.5);">← Back</button>
+        <h2 style="color: #cc0066;">I have a gift for you...</h2>
+        <div id="screen1-buttons" style="z-index: 10; position: relative;">
+            <button class="btn" onclick="goToDashboard()">Open</button>
+            <button class="btn" style="background: #999;" onclick="doNotOpen()">Not Open</button>
+        </div>
+        <div id="sad-minion-container" style="display:none; margin-top: 20px; z-index: 10; position: relative;">
+            <img src="assets/minion-sad.jpg" alt="Sad Minion" width="200" style="border-radius: 10px;">
+            <h3 style="color: #cc0066;">Please open the gift 🥺</h3>
+        </div>
+    </div>
+
+    <div id="screen2" class="screen">
+        <h2 style="color: #cc0066; z-index: 10; position: relative; margin-bottom: 30px;">Unlock your surprises step by step</h2>
+        <div class="grid">
+            <div class="icon" id="opt1" onclick="viewOption(1)">🌸</div>
+            <div class="icon locked" id="opt2" onclick="viewOption(2)">📸</div>
+            <div class="icon locked" id="opt3" onclick="viewOption(3)">🎥</div>
+            <div class="icon locked" id="opt4" onclick="viewOption(4)">💌</div>
+        </div>
+        <div style="display: flex; justify-content: center; width: 100%;">
+            <div class="icon" id="fifth-icon" onclick="startBananaGame()" style="width: 130px; height: 130px; font-size: 65px; border-radius: 25px;">🍌</div>
+        </div>
+    </div>
+
+    <div id="modal-1" class="option-modal">
+        <button class="back-btn" onclick="closeModal(1)">← Back</button>
+        <h2 style="margin-bottom: 20px;">Your Beautiful Flowers!</h2>
+        <div id="bouquet-photos" class="bouquet-cluster"></div>
+        <div class="stem-container"><div class="bow"></div></div>
+    </div>
+
+    <div id="modal-2" class="option-modal">
+        <button class="back-btn" onclick="closeModal(2)">← Back</button>
+        <h2 style="margin-bottom: 10px;">Your Photo Album</h2>
+        <p style="margin-bottom: 20px; color: #ffb6c1;">(Tap the right page to turn)</p>
+        <div class="book-wrapper">
+            <div class="book" id="album-book"></div>
+        </div>
+    </div>
+
+    <div id="modal-3" class="option-modal">
+        <button class="back-btn" onclick="closeModal(3)">← Back</button>
+        <h2 style="margin-bottom: 20px;">A Special Message</h2>
+        <video id="minion-vid" width="90%" style="max-width: 400px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);" controls playsinline>
+            <source src="assets/minion-happy.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <div id="modal-4" class="option-modal">
+        <button class="back-btn" onclick="closeModal(4)">← Back</button>
+        <div class="letter-paper">
+            <div class="letter-content">
+                <p>My dearest Alicia,</p>
+                <p>Happy Birthday, my beautiful girl! As you read this, having unlocked all the surprises I put together, I hope you have the biggest smile on your face.</p>
+                <p>I wanted to do something completely different for you this year. Anyone can just buy a card, but I wanted to build a private digital world just for you. Every line of code, every minion popping out of a door, and every floating banana was made to celebrate you. Applying what I’m learning in my ICT program at Victoria University just to create this for your birthday has easily been my favorite project I’ve ever worked on.</p>
+                <p>Alicia, from the moment you came into my life, everything just got brighter. You have this effortless ability to make the ordinary feel extraordinary. Looking at the pictures you just clicked through in the album, I don't just see photos—I see a timeline of us growing closer and falling deeper in love. You are not just my girlfriend; you are my best friend, my safest place, and my greatest adventure all wrapped into one.</p>
+                <p>I am so incredibly proud of the person you are. You inspire me to be a better man, to grow, and to build a future that is as beautiful and kind as your heart. Whenever I see you pursuing what you want, or just being your authentic self, I am reminded of how endlessly lucky I am to be yours. My goal, today and every single day, is to cheer the loudest for you and remind you of your infinite worth.</p>
+                <p>As you get ready to blow out those digital candles today—and the real ones later!—I want you to make the biggest wish you can possibly think of. Because I promise to do everything in my power to help make those wishes come true. Thank you for choosing me, for loving me, and for letting me love you in return. This past year has been amazing, but I know the next one is going to be even better.</p>
+                <p>Happy Birthday, my Alicia. I love you, completely and unconditionally.</p>
+                <div class="letter-signature">
+                    With all my love, forever and always,<br>Kevin ❤️
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen3" class="screen">
+        <h2 style="color: #cc0066; z-index: 10; position: relative;">Collect 19 Bananas to Build Your Cake!</h2>
+        <div id="cake-container"></div>
+    </div>
+
+    <div id="screen4" class="screen">
+        <h1 id="finale-text">Happy Birthday Alicia!</h1>
+        
+        <div id="candle-container" style="display: flex; justify-content: space-around; width: 100px; margin: 0 auto -5px auto; position: relative; z-index: 15;">
+            <div class="candle"><div class="flame"></div></div>
+            <div class="candle"><div class="flame"></div></div>
+            <div class="candle"><div class="flame"></div></div>
+            <div class="candle"><div class="flame"></div></div>
+            <div class="candle"><div class="flame"></div></div>
+        </div>
+        
+        <div class="realistic-cake">
+            <div class="tier top-tier"></div>
+            <div class="tier mid-tier"></div>
+            <div class="tier bot-tier"></div>
+        </div>
+        
+        <p id="mic-instruction" style="color: #cc0066; font-weight: bold; margin-top: 20px; z-index: 10; position: relative;">Blow into your microphone to put out the candles!</p>
+        <h2 id="signature">from Kevin ❤️</h2>
+    </div>
+
+    <script>
+        let unlocked = { 1: true, 2: false, 3: false, 4: false }; 
+        let viewed = { 1: false, 2: false, 3: false, 4: false };   
+        let bananasCollected = 0;
+
+        function openInitialPresent() {
+            for(let i=0; i<10; i++) {
+                let balloon = document.createElement('div');
+                balloon.className = 'balloon';
+                balloon.innerText = '🎈';
+                balloon.style.left = Math.random() * 90 + 'vw';
+                balloon.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                document.body.appendChild(balloon);
+                setTimeout(() => balloon.remove(), 5000);
+            }
+            document.getElementById('screen0').classList.remove('active');
+            document.getElementById('screen1').classList.add('active');
+        }
+
+        function triggerYay(message) {
+            let minion = document.getElementById('minion-companion');
+            let bubble = document.getElementById('speech-bubble');
+            let door = document.getElementById('door');
+            bubble.innerText = message; 
+            door.style.transform = "rotateY(-100deg)"; 
+            setTimeout(() => {
+                minion.style.transform = "translateX(65px)"; 
+                setTimeout(() => {
+                    bubble.classList.add('show-bubble'); 
+                    setTimeout(() => {
+                        bubble.classList.remove('show-bubble'); 
+                        minion.style.transform = "translateX(65px) scaleX(-1)"; 
+                        setTimeout(() => {
+                            minion.style.transform = "translateX(0) scaleX(-1)"; 
+                            setTimeout(() => {
+                                door.style.transform = "rotateY(0deg)"; 
+                                minion.style.transform = "translateX(0) scaleX(1)"; 
+                            }, 500);
+                        }, 500); 
+                    }, 3000); 
+                }, 500); 
+            }, 300); 
+        }
+
+        function triggerHeart() {
+            let minion = document.getElementById('minion-companion');
+            let door = document.getElementById('door');
+            let heart = document.getElementById('minion-heart');
+            door.style.transform = "rotateY(-100deg)";
+            setTimeout(() => {
+                minion.style.transform = "translateX(65px)";
+                setTimeout(() => { heart.classList.add('show-heart'); }, 500);
+            }, 300);
+        }
+
+        function doNotOpen() {
+            document.getElementById('screen1-buttons').style.display = 'none';
+            document.getElementById('sad-minion-container').style.display = 'block';
+            document.getElementById('screen1-back-btn').style.display = 'block';
+        }
+
+        function resetScreen1() {
+            document.getElementById('screen1-buttons').style.display = 'block';
+            document.getElementById('sad-minion-container').style.display = 'none';
+            document.getElementById('screen1-back-btn').style.display = 'none';
+        }
+
+        function goToDashboard() {
+            let music = document.getElementById('bg-music');
+            music.volume = 0.2; 
+            music.play().catch(e => console.log("Audio blocked by browser auto-play policy."));
+            
+            document.getElementById('screen1').classList.remove('active');
+            document.getElementById('screen2').classList.add('active');
+            document.getElementById('companion-area').style.display = 'flex';
+            document.getElementById('opt1').classList.add('shaking-option');
+            
+            // Minion greets her upon entering the dashboard
+            triggerYay("Bello Alicia!");
+        }
+
+        function buildBouquet() {
+            let container = document.getElementById('bouquet-photos');
+            container.innerHTML = ''; 
+            for(let i=1; i<=10; i++) {
+                let rotation = -15 + (Math.random() * 30); 
+                container.innerHTML += `<div class="flower-pic" style="background-image: url('assets/pic${i}.jpg'); background-color: #ddd; transform: rotate(${rotation}deg);"></div>`;
+            }
+        }
+
+        function buildAlbumBook() {
+            let book = document.getElementById('album-book');
+            if(book.innerHTML !== '') return; 
+            let totalPages = 9; // Updated to 9 pages
+            for(let i = 1; i <= totalPages; i++) {
+                let page = document.createElement('div');
+                page.className = 'page';
+                page.style.zIndex = totalPages - i + 1; 
+                page.onclick = function() {
+                    if (this.classList.contains('turned')) {
+                        this.classList.remove('turned');
+                        setTimeout(() => { this.style.zIndex = totalPages - i + 1; }, 400); 
+                        if(i === 1) book.classList.remove('open'); 
+                    } else {
+                        this.classList.add('turned');
+                        setTimeout(() => { this.style.zIndex = i; }, 400); 
+                        if(i === 1) book.classList.add('open'); 
+                    }
+                };
+                let front = document.createElement('div');
+                front.className = 'page-front';
+                front.innerHTML = `<img src="assets/album${i}.jpg" alt="Memory ${i}"><div class="page-text">${i} / 9</div>`;
+                let back = document.createElement('div');
+                back.className = 'page-back';
+                back.innerHTML = `<div style="display:flex; height:100%; align-items:center; justify-content:center; color:#ffb6c1; font-size:30px;">❤️</div>`;
+                page.appendChild(front);
+                page.appendChild(back);
+                book.appendChild(page);
+            }
+        }
+
+        function viewOption(num) {
+            if (!unlocked[num]) return;
+            document.getElementById('opt' + num).classList.remove('shaking-option');
+            document.getElementById('opt' + num).classList.add('viewed');
+            
+            setTimeout(() => {
+                if(num === 1) buildBouquet();
+                if(num === 2) buildAlbumBook(); 
+                if(num === 3) {
+                    let vid = document.getElementById('minion-vid');
+                    vid.currentTime = 0; 
+                    vid.play().catch(e => console.log("Video auto-play blocked by browser."));
+                }
+                
+                document.getElementById('modal-' + num).style.display = 'flex';
+            }, 100); 
+        }
+
+        function closeModal(num) {
+            document.getElementById('modal-' + num).style.display = 'none';
+            if(num === 3) {
+                document.getElementById('minion-vid').pause();
+            }
+            
+            // Minion talks ONLY when backing out of an option
+            let minionMessages = {
+                1: "Ooo, Pwede na! 🌸",
+                2: "Papoy! 📸",
+                3: "Bello, Para tu! 🎥",
+                4: "Tulaliloo ti amo! 💌"
+            };
+            if(!viewed[num]) {
+                triggerYay(minionMessages[num]);
+            }
+            
+            viewed[num] = true;
+
+            let nextNum = num + 1;
+            if (nextNum <= 4 && !unlocked[nextNum]) {
+                unlocked[nextNum] = true;
+                let nextBtn = document.getElementById('opt' + nextNum);
+                nextBtn.classList.remove('locked');
+                nextBtn.classList.add('unlock-anim');
+                setTimeout(() => {
+                    nextBtn.classList.remove('unlock-anim');
+                    nextBtn.classList.add('shaking-option');
+                }, 600); 
+            }
+            if (viewed[1] && viewed[2] && viewed[3] && viewed[4]) {
+                let fifth = document.getElementById('fifth-icon');
+                fifth.style.display = 'flex';
+                fifth.classList.add('slide-up-anim');
+                setTimeout(() => {
+                    fifth.classList.remove('slide-up-anim');
+                    fifth.classList.add('shaking-option');
+                }, 800);
+            }
+        }
+
+        function startBananaGame() {
+            document.getElementById('screen2').classList.remove('active');
+            document.getElementById('screen3').classList.add('active');
+            spawnBananas();
+        }
+
+        function spawnBananas() {
+            let gameArea = document.getElementById('screen3');
+            let interval = setInterval(() => {
+                if (bananasCollected >= 19) {
+                    clearInterval(interval);
+                    return;
+                }
+                let banana = document.createElement('div');
+                banana.className = 'banana';
+                banana.innerText = '🍌';
+                banana.style.left = Math.random() * 80 + 'vw';
+                banana.onclick = function() {
+                    this.remove();
+                    bananasCollected++;
+                    buildCake();
+                    
+                    // Minion praises her at the end of the game
+                    if (bananasCollected === 19) {
+                        triggerYay("Nice Work!");
+                        // Wait for minion animation to finish before jumping screens
+                        setTimeout(startFinale, 5000);
+                    }
+                };
+                gameArea.appendChild(banana);
+            }, 800);
+        }
+
+        function buildCake() {
+            let cakeDiv = document.getElementById('cake-container');
+            let piece = document.createElement('div');
+            piece.className = 'cake-piece';
+            
+            // Dynamic width to create a tiered cake look
+            let width = '100%';
+            if (bananasCollected >= 15) width = '60%';
+            else if (bananasCollected >= 8) width = '80%';
+            
+            piece.style.width = width;
+            piece.style.height = (100 / 19) + '%';
+            
+            // Frosting lines
+            if (bananasCollected === 19 || bananasCollected === 14 || bananasCollected === 7) {
+                piece.style.borderTop = '4px solid #fff';
+            } else {
+                piece.style.borderTop = '1px solid #fff';
+            }
+            
+            if (bananasCollected === 1) piece.style.borderRadius = '0 0 10px 10px';
+            if (bananasCollected === 19) piece.style.borderRadius = '10px 10px 0 0';
+
+            cakeDiv.appendChild(piece);
+        }
+
+        function startFinale() {
+            document.getElementById('screen3').classList.remove('active');
+            document.getElementById('screen4').classList.add('active');
+            listenToMicrophone();
+        }
+
+        async function listenToMicrophone() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const analyzer = audioContext.createAnalyser();
+                const microphone = audioContext.createMediaStreamSource(stream);
+                microphone.connect(analyzer);
+                analyzer.fftSize = 256;
+                const bufferLength = analyzer.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                function checkVolume() {
+                    analyzer.getByteFrequencyData(dataArray);
+                    let sum = 0;
+                    for(let i = 0; i < bufferLength; i++) { sum += dataArray[i]; }
+                    let average = sum / bufferLength;
+                    if (average > 80) { 
+                        triggerWin();
+                        stream.getTracks().forEach(track => track.stop()); 
+                    } else {
+                        requestAnimationFrame(checkVolume);
+                    }
+                }
+                checkVolume();
+            } catch (err) {
+                alert("Please allow microphone access so you can blow out the candles!");
+            }
+        }
+
+        function triggerWin() {
+            document.getElementById('mic-instruction').style.display = 'none'; 
+            document.getElementById('finale-text').style.display = 'block';
+            document.getElementById('signature').style.display = 'block';
+            let flames = document.querySelectorAll('.flame');
+            flames.forEach(f => f.style.display = 'none');
+            
+            let duration = 30 * 1000;
+            let animationEnd = Date.now() + duration;
+            (function frame() {
+                let timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return; 
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ff1a8c', '#ff66b2', '#ffffff'] });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#ff1a8c', '#ff66b2', '#ffffff'] });
+                requestAnimationFrame(frame);
+            }());
+            
+            // Finale Minion Routine
+            triggerYay("HAPPY BIRTHDAYYY!!!!");
+            
+            // Wait 6.8 seconds (4.8s for triggerYay to finish + 2s wait inside) then come out with heart
+            setTimeout(() => {
+                triggerHeart();
+            }, 6800);
+        }
+    </script>
+</body>
+</html>
