@@ -399,8 +399,8 @@
             let book = document.getElementById('album-book');
             if(book.innerHTML !== '') return; 
             
-            // Exactly 15 images: 1-15 sequentially
-            const albumIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+            // Reverted back to your original code: Exactly 15 images: 1-9, then duplicate 2 to skip 10, then 11-15
+            const albumIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 2, 11, 12, 13, 14, 15];
             let totalPages = albumIndices.length; 
             
             albumIndices.forEach((imgIdx, index) => {
