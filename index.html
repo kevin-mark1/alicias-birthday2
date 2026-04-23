@@ -376,17 +376,20 @@
             let container = document.getElementById('bouquet-photos');
             container.innerHTML = ''; 
             
-            // Replaced the 10th spot with 'heart' instead of an image number
-            const flowerIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 'heart', 11, 12, 13, 14, 15, 16, 17];
+            // Revised array: 1-9, unique 10, heart for 11, 12-17
+            // This ensures picture 10 is unique and picture 11's position has the heart
+            const flowerIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 'heart', 12, 13, 14, 15, 16, 17];
             
             flowerIndices.forEach(idx => {
                 let rotation = -15 + (Math.random() * 30); 
                 
-                // If it is the heart, build a special card with the emoji inside
+                // Special handling for picture 11 slot: place a heart emoji!
                 if (idx === 'heart') {
+                    // Create decorative card with heart emoji styled to look like a flower card
                     container.innerHTML += `<div class="flower-pic" style="transform: rotate(${rotation}deg); display: flex; justify-content: center; align-items: center; font-size: 55px; background-color: white;">❤️</div>`;
                 } else {
-                    // Otherwise, load the picture normally
+                    // Otherwise, load picture as unique card
+                    // Picture 10 will now look for unique pic10.jpg
                     container.innerHTML += `<div class="flower-pic" style="background-image: url('assets/pic${idx}.jpg'); background-color: #ddd; transform: rotate(${rotation}deg);"></div>`;
                 }
             });
@@ -396,8 +399,8 @@
             let book = document.getElementById('album-book');
             if(book.innerHTML !== '') return; 
             
-            // Exactly 15 images: 1-9, then duplicate 2 to skip 10, then 11-15
-            const albumIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 2, 11, 12, 13, 14, 15];
+            // Exactly 15 images: 1-15 sequentially
+            const albumIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
             let totalPages = albumIndices.length; 
             
             albumIndices.forEach((imgIdx, index) => {
