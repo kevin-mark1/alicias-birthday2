@@ -268,6 +268,7 @@
         function openInitialPresent() {
             balloonInterval = setInterval(spawnHappyBalloon, 700);
             
+            // Automatically clear balloons after 30 seconds
             setTimeout(() => {
                 clearInterval(balloonInterval);
             }, 30000);
@@ -276,6 +277,7 @@
             document.getElementById('screen1').classList.add('active');
         }
 
+        // Custom duration added so we can control exactly how long he stays out
         function triggerYay(message, duration = 3500) {
             let minion = document.getElementById('minion-companion');
             let bubble = document.getElementById('speech-bubble');
@@ -287,6 +289,7 @@
                 minion.style.transform = "translateX(65px)"; 
                 setTimeout(() => {
                     bubble.classList.add('show-bubble'); 
+                    // Bubble stays on screen for the specified duration
                     setTimeout(() => {
                         bubble.classList.remove('show-bubble'); 
                         minion.style.transform = "translateX(65px) scaleX(-1)"; 
@@ -373,8 +376,8 @@
             let container = document.getElementById('bouquet-photos');
             container.innerHTML = ''; 
             
-            // 17 images exactly: 1-9, 11-18 (skipping 10)
-            const flowerIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18];
+            // Exactly 17 images: 1-9, then duplicate 2 to skip 10, then 11-17
+            const flowerIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 2, 11, 12, 13, 14, 15, 16, 17];
             
             flowerIndices.forEach(idx => {
                 let rotation = -15 + (Math.random() * 30); 
@@ -386,8 +389,8 @@
             let book = document.getElementById('album-book');
             if(book.innerHTML !== '') return; 
             
-            // 14 images exactly: 1-9, 11-15 (skipping 10 completely)
-            const albumIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15];
+            // Exactly 15 images: 1-9, then duplicate 2 to skip 10, then 11-15
+            const albumIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 2, 11, 12, 13, 14, 15];
             let totalPages = albumIndices.length; 
             
             albumIndices.forEach((imgIdx, index) => {
