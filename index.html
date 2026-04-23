@@ -124,8 +124,8 @@
 </head>
 <body>
 
-    <audio id="bg-music" loop>
-        <source src="assets/rain-dance.mp3" type="audio/mpeg">
+    <audio id="bg-music" loop preload="auto">
+        <source src="assets/rain-dance.mp3.mp3" type="audio/mpeg">
     </audio>
 
     <div id="screen0" class="screen active">
@@ -361,7 +361,7 @@
             document.querySelectorAll('.floating-item').forEach(b => b.remove());
 
             let music = document.getElementById('bg-music');
-            music.volume = 0.2; 
+            music.volume = 1.0; 
             music.play().catch(e => console.log("Audio play blocked."));
             
             document.getElementById('screen1').classList.remove('active');
