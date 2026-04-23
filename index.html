@@ -246,13 +246,18 @@
         let audioFadeInterval; // Keeps track of fading so it doesn't glitch
         let intendedVolume = 1.0; // Tracks what volume the music SHOULD be at
 
-        // Helper function to slowly fade music in or out
-        function fadeAudio(targetVolume, duration) {
+        // Helper function to slowly fade music in or out and pause when silent
+        function fadeAudio(targetVolume, duration, pauseAtEnd = false) {
             let music = document.getElementById('bg-music');
             if (!music) return;
             
             // Cancel any ongoing fades so they don't fight each other
             if (audioFadeInterval) clearInterval(audioFadeInterval);
+            
+            // If we are supposed to fade in and the music is currently paused, start playing it first
+            if (targetVolume > 0 && music.paused) {
+                music.play().catch(e => console.log("Audio play blocked."));
+            }
             
             let currentVolume = music.volume;
             let stepTime = 50; 
@@ -267,18 +272,23 @@
                     (volumeChange < 0 && currentVolume <= targetVolume)) {
                     music.volume = Math.max(0, Math.min(1, targetVolume));
                     clearInterval(audioFadeInterval);
+                    
+                    // Pause the actual track if it reached 0 and pauseAtEnd is true
+                    if (targetVolume === 0 && pauseAtEnd) {
+                        music.pause();
+                    }
                 } else {
                     music.volume = Math.max(0, Math.min(1, currentVolume));
                 }
             }, stepTime);
         }
 
-        // Fade music out if she switches tabs/apps, and fade back in when she returns
+        // Fade music out and pause if she switches tabs/apps, and fade back in when she returns
         document.addEventListener("visibilitychange", () => {
             if (document.hidden) {
-                fadeAudio(0.0, 1000); // Fade out over 1 second when leaving
+                fadeAudio(0.0, 1000, true); // Fade out and pause over 1 second when leaving
             } else {
-                fadeAudio(intendedVolume, 1000); // Fade back to exactly where it's supposed to be
+                fadeAudio(intendedVolume, 1000); // Unpause and fade back to exactly where it's supposed to be
             }
         });
 
@@ -523,16 +533,16 @@
             vid.currentTime = 0;
             vid.play().catch(e => console.log(e));
             
-            // Smoothly fade music to silent over 1 second when video opens
+            // Smoothly fade music to silent over 1 second, then pause the track
             intendedVolume = 0.0;
-            fadeAudio(0.0, 1000);
+            fadeAudio(0.0, 1000, true);
         }
 
         function closeVideoModal() {
             document.getElementById('modal-video').style.display = 'none';
             document.getElementById('minion-vid').pause();
             
-            // Smoothly fade music back to 100% over 1 second when video closes
+            // Unpause and smoothly fade music back to 100% over 1 second when video closes
             intendedVolume = 1.0;
             fadeAudio(1.0, 1000);
         }
@@ -611,9 +621,9 @@
             document.getElementById('screen3').classList.remove('active');
             document.getElementById('screen4').classList.add('active');
             
-            // Smoothly fade the music to silence over 2 seconds before blowing candles
+            // Smoothly fade the music to silence over 2 seconds, then pause before blowing candles
             intendedVolume = 0.0;
-            fadeAudio(0.0, 2000);
+            fadeAudio(0.0, 2000, true);
             
             try {
                 listenToMicrophone();
@@ -651,7 +661,7 @@
         }
 
         function triggerWin() {
-            // Smoothly fade the music back up to 100% over 2 seconds once candles are blown!
+            // Unpause and smoothly fade the music back up to 100% over 2 seconds once candles are blown!
             intendedVolume = 1.0;
             fadeAudio(1.0, 2000);
 
