@@ -63,11 +63,32 @@
         .page-front img { width: 90%; height: 85%; object-fit: cover; margin: 5% auto 0 auto; display: block; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .page-text { font-size: 14px; color: #cc0066; font-weight: bold; margin-top: 5px; }
 
-        /* Letter Stationery */
-        .letter-paper { background: #fff; width: 90%; max-width: 500px; height: 70vh; margin-top: 40px; border-radius: 15px; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow-y: auto; text-align: left; padding: 20px; }
-        .letter-paper::before { content: '🌸🌺🌻🌼'; font-size: 24px; position: absolute; top: -15px; left: 10px; z-index: 10; }
-        .letter-paper::after { content: '🌼🌻🌺🌸'; font-size: 24px; position: absolute; bottom: -15px; right: 10px; z-index: 10; }
-        .letter-content { color: #cc0066; line-height: 1.6; font-size: 16px; padding: 10px 15px; }
+        /* Letter Stationery (Updated with Full Floral Border) */
+        .letter-paper { 
+            background-color: #ffd1dc; 
+            background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><text x='15' y='30' font-size='22'>🌸</text><text x='55' y='20' font-size='18'>🌺</text><text x='35' y='65' font-size='24'>🌼</text><text x='70' y='75' font-size='16'>🌻</text></svg>");
+            width: 90%; 
+            max-width: 500px; 
+            height: 75vh; 
+            margin-top: 40px; 
+            border-radius: 15px; 
+            position: relative; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6); 
+            padding: 30px; /* Creates the thick flower border */
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+        .letter-content-wrapper {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 25px;
+            overflow-y: auto;
+            flex-grow: 1;
+            text-align: left;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
+        }
+        .letter-content { color: #cc0066; line-height: 1.6; font-size: 16px; }
         .letter-content p { margin-bottom: 15px; }
         .letter-signature { margin-top: 25px; font-style: italic; font-weight: bold; color: #ff1a8c; font-size: 18px; text-align: right; }
 
@@ -185,16 +206,18 @@
     <div id="modal-3" class="option-modal">
         <button class="back-btn" onclick="closeModal(3)">← Back</button>
         <div class="letter-paper">
-            <div class="letter-content">
-                <p>My dearest Alicia,</p>
-                <p>Happy Birthday, my beautiful girl! As you read this, having unlocked all the surprises I put together, I hope you have the biggest smile on your face.</p>
-                <p>I wanted to do something completely different for you this year. Anyone can just buy a card, but I wanted to build a private digital world just for you. Every line of code, every minion popping out of a door, and every floating banana was made to celebrate you. Applying what I’m learning in my ICT program at Victoria University just to create this for your birthday has easily been my favorite project I’ve ever worked on.</p>
-                <p>Alicia, from the moment you came into my life, everything just got brighter. You have this effortless ability to make the ordinary feel extraordinary. Looking at the pictures you just clicked through in the album, I don't just see photos—I see a timeline of us growing closer and falling deeper in love. You are not just my girlfriend; you are my best friend, my safest place, and my greatest adventure all wrapped into one.</p>
-                <p>I am so incredibly proud of the person you are. You inspire me to be a better man, to grow, and to build a future that is as beautiful and kind as your heart. Whenever I see you pursuing what you want, or just being your authentic self, I am reminded of how endlessly lucky I am to be yours. My goal, today and every single day, is to cheer the loudest for you and remind you of your infinite worth.</p>
-                <p>As you get ready to blow out those digital candles today—and the real ones later!—I want you to make the biggest wish you can possibly think of. Because I promise to do everything in my power to help make those wishes come true. Thank you for choosing me, for loving me, and for letting me love you in return. This past year has been amazing, but I know the next one is going to be even better.</p>
-                <p>Happy Birthday, my Alicia. I love you, completely and unconditionally.</p>
-                <div class="letter-signature">
-                    With all my love, forever and always,<br>Kevin ❤️
+            <div class="letter-content-wrapper">
+                <div class="letter-content">
+                    <p>My dearest Alicia,</p>
+                    <p>Happy Birthday, my beautiful girl! As you read this, having unlocked all the surprises I put together, I hope you have the biggest smile on your face.</p>
+                    <p>I wanted to do something completely different for you this year. Anyone can just buy a card, but I wanted to build a private digital world just for you. Creating this for your birthday has easily been my favorite project I have ever worked on.</p>
+                    <p>Alicia, from the moment you came into my life, everything just got brighter. You have this effortless ability to make the ordinary feel extraordinary. Looking at the pictures you just clicked through in the album, I don't just see photos, I see a beautiful timeline of the amazing woman you are and how you continue to grow and shine every single day. You are not just my girlfriend; you are my best friend, my safest place, and my greatest adventure all wrapped into one.</p>
+                    <p>I am so incredibly proud of the person you are. You inspire me to be a better man, to grow, and to build a future that is as beautiful and kind as your heart. Whenever I see you pursuing what you want, or just being your authentic self, I am reminded of how endlessly lucky I am to be yours. My goal, today and every single day, is to cheer the loudest for you and remind you of your infinite worth.</p>
+                    <p>As you get ready to blow out those digital candles today, and the real ones later, I want you to make the biggest wish you can possibly think of. Because I promise to do everything in my power to help make those wishes come true. Thank you for choosing me, for loving me, and for letting me love you in return. This past year has been amazing, but I know the next one is going to be even better.</p>
+                    <p>Happy Birthday, my Alicia. I love you, completely and unconditionally.</p>
+                    <div class="letter-signature">
+                        With all my love, forever and always,<br>Kevin ❤️
+                    </div>
                 </div>
             </div>
         </div>
