@@ -243,6 +243,44 @@
         let balloonInterval;
         let sadInterval;
         let bananaInterval;
+        let audioFadeInterval; // Keeps track of fading so it doesn't glitch
+        let intendedVolume = 1.0; // Tracks what volume the music SHOULD be at
+
+        // Helper function to slowly fade music in or out
+        function fadeAudio(targetVolume, duration) {
+            let music = document.getElementById('bg-music');
+            if (!music) return;
+            
+            // Cancel any ongoing fades so they don't fight each other
+            if (audioFadeInterval) clearInterval(audioFadeInterval);
+            
+            let currentVolume = music.volume;
+            let stepTime = 50; 
+            let steps = duration / stepTime;
+            let volumeChange = (targetVolume - currentVolume) / steps;
+            
+            audioFadeInterval = setInterval(() => {
+                currentVolume += volumeChange;
+                
+                // If we've reached or passed the target volume
+                if ((volumeChange > 0 && currentVolume >= targetVolume) || 
+                    (volumeChange < 0 && currentVolume <= targetVolume)) {
+                    music.volume = Math.max(0, Math.min(1, targetVolume));
+                    clearInterval(audioFadeInterval);
+                } else {
+                    music.volume = Math.max(0, Math.min(1, currentVolume));
+                }
+            }, stepTime);
+        }
+
+        // Fade music out if she switches tabs/apps, and fade back in when she returns
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                fadeAudio(0.0, 1000); // Fade out over 1 second when leaving
+            } else {
+                fadeAudio(intendedVolume, 1000); // Fade back to exactly where it's supposed to be
+            }
+        });
 
         function spawnHappyBalloon() {
             let balloon = document.createElement('div');
@@ -484,11 +522,19 @@
             let vid = document.getElementById('minion-vid');
             vid.currentTime = 0;
             vid.play().catch(e => console.log(e));
+            
+            // Smoothly fade music to silent over 1 second when video opens
+            intendedVolume = 0.0;
+            fadeAudio(0.0, 1000);
         }
 
         function closeVideoModal() {
             document.getElementById('modal-video').style.display = 'none';
             document.getElementById('minion-vid').pause();
+            
+            // Smoothly fade music back to 100% over 1 second when video closes
+            intendedVolume = 1.0;
+            fadeAudio(1.0, 1000);
         }
 
         function startBananaGame() {
@@ -565,6 +611,10 @@
             document.getElementById('screen3').classList.remove('active');
             document.getElementById('screen4').classList.add('active');
             
+            // Smoothly fade the music to silence over 2 seconds before blowing candles
+            intendedVolume = 0.0;
+            fadeAudio(0.0, 2000);
+            
             try {
                 listenToMicrophone();
             } catch(e) {
@@ -601,6 +651,10 @@
         }
 
         function triggerWin() {
+            // Smoothly fade the music back up to 100% over 2 seconds once candles are blown!
+            intendedVolume = 1.0;
+            fadeAudio(1.0, 2000);
+
             let flames = document.querySelectorAll('.flame');
             flames.forEach(f => f.style.display = 'none');
             
@@ -609,7 +663,8 @@
             document.getElementById('finale-text').style.display = 'inline-block';
             document.getElementById('signature').style.display = 'block';
             
-            let duration = 30 * 1000;
+            // Confetti now lasts exactly 60 seconds (1 minute)
+            let duration = 60 * 1000;
             let animationEnd = Date.now() + duration;
             (function frame() {
                 let timeLeft = animationEnd - Date.now();
