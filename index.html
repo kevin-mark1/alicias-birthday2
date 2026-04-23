@@ -376,12 +376,19 @@
             let container = document.getElementById('bouquet-photos');
             container.innerHTML = ''; 
             
-            // EXACT CHANGE HERE: The 10th spot now loads picture 15!
-            const flowerIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 11, 12, 13, 14, 15, 16, 17];
+            // Replaced the 10th spot with 'heart' instead of an image number
+            const flowerIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 'heart', 11, 12, 13, 14, 15, 16, 17];
             
             flowerIndices.forEach(idx => {
                 let rotation = -15 + (Math.random() * 30); 
-                container.innerHTML += `<div class="flower-pic" style="background-image: url('assets/pic${idx}.jpg'); background-color: #ddd; transform: rotate(${rotation}deg);"></div>`;
+                
+                // If it is the heart, build a special card with the emoji inside
+                if (idx === 'heart') {
+                    container.innerHTML += `<div class="flower-pic" style="transform: rotate(${rotation}deg); display: flex; justify-content: center; align-items: center; font-size: 55px; background-color: white;">❤️</div>`;
+                } else {
+                    // Otherwise, load the picture normally
+                    container.innerHTML += `<div class="flower-pic" style="background-image: url('assets/pic${idx}.jpg'); background-color: #ddd; transform: rotate(${rotation}deg);"></div>`;
+                }
             });
         }
 
