@@ -145,12 +145,12 @@
         <button id="screen1-back-btn" class="back-btn" onclick="resetScreen1()" style="display: none; color: #cc0066; border-color: #cc0066; background: rgba(255,255,255,0.5);">← Back</button>
         <div class="pink-bubble"><h2>I have a gift for you...</h2></div>
         <div id="screen1-buttons" style="z-index: 10; position: relative;">
-            <button class="btn" onclick="goToDashboard()">Open</button>
-            <button class="btn" style="background: #999;" onclick="doNotOpen()">Not Open</button>
+            <button id="btn-open" class="btn" onclick="goToDashboard()">Open</button>
+            <button id="btn-not-open" class="btn" style="background: #999;" onclick="doNotOpen()">Do not open!</button>
         </div>
         <div id="sad-minion-container" style="display:none; margin-top: 20px; z-index: 10; position: relative;">
             <img src="assets/minion-sad.jpg" alt="Sad Minion" width="200" style="border-radius: 10px;">
-            <h3 style="color: #cc0066; font-weight: bold; background: white; padding: 10px; border-radius: 10px;">Please open the gift 🥺</h3>
+            <h3 style="color: #cc0066; font-weight: bold; background: white; padding: 10px; border-radius: 10px;">What did you think was here 😂</h3>
         </div>
     </div>
 
@@ -243,6 +243,7 @@
         let balloonInterval;
         let sadInterval;
         let bananaInterval;
+        let buttonShakeInterval;
         let audioFadeInterval; // Keeps track of fading so it doesn't glitch
         let intendedVolume = 1.0; // Tracks what volume the music SHOULD be at
 
@@ -305,7 +306,8 @@
         function spawnSadEmoji() {
             let sad = document.createElement('div');
             sad.className = 'floating-item sad-emoji'; 
-            let emojis = ['🥺', '😭', '😢', '💔'];
+            // Changed from crying emojis to laughing emojis!
+            let emojis = ['😂', '🤣', '😆', '😹'];
             sad.innerText = emojis[Math.floor(Math.random() * emojis.length)];
             sad.style.left = Math.random() * 90 + 'vw';
             sad.style.animationDuration = (Math.random() * 2 + 3) + 's';
@@ -323,6 +325,26 @@
 
             document.getElementById('screen0').classList.remove('active');
             document.getElementById('screen1').classList.add('active');
+
+            // Button shaking logic
+            let btnOpen = document.getElementById('btn-open');
+            let btnNotOpen = document.getElementById('btn-not-open');
+            let shakeDoNotOpen = true;
+
+            // Make "Do not open!" shake immediately
+            btnNotOpen.classList.add('shaking-option');
+
+            // Then pass the shake back and forth every 2.5 seconds
+            buttonShakeInterval = setInterval(() => {
+                if (shakeDoNotOpen) {
+                    btnNotOpen.classList.remove('shaking-option');
+                    btnOpen.classList.add('shaking-option');
+                } else {
+                    btnOpen.classList.remove('shaking-option');
+                    btnNotOpen.classList.add('shaking-option');
+                }
+                shakeDoNotOpen = !shakeDoNotOpen;
+            }, 2500);
         }
 
         // Custom duration added so we can control exactly how long he stays out
@@ -387,7 +409,7 @@
             document.getElementById('sad-minion-container').style.display = 'block';
             document.getElementById('screen1-back-btn').style.display = 'block';
             
-            triggerYay("Oh no! Please open it!", 2500);
+            // Note: The minion NO LONGER comes out here!
         }
 
         function resetScreen1() {
@@ -400,12 +422,13 @@
             document.getElementById('sad-minion-container').style.display = 'none';
             document.getElementById('screen1-back-btn').style.display = 'none';
             
-            triggerYay("Yay! You came back!", 2500);
+            // Note: The minion NO LONGER comes out here!
         }
 
         function goToDashboard() {
             clearInterval(balloonInterval);
             clearInterval(sadInterval);
+            clearInterval(buttonShakeInterval); // Stop buttons from shaking in the background
             document.querySelectorAll('.floating-item').forEach(b => b.remove());
 
             let music = document.getElementById('bg-music');
@@ -417,6 +440,7 @@
             document.getElementById('companion-area').style.display = 'flex';
             document.getElementById('opt1').classList.add('shaking-option');
             
+            // Minion ONLY comes out for the first time right here!
             triggerYay("Bello Alicia!", 3500);
         }
 
@@ -636,14 +660,14 @@
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const analyzer = audioContext.createAnalyser();
+                const analyser = audioContext.createAnalyser();
                 const microphone = audioContext.createMediaStreamSource(stream);
-                microphone.connect(analyzer);
-                analyzer.fftSize = 256;
-                const bufferLength = analyzer.frequencyBinCount;
+                microphone.connect(analyser);
+                analyser.fftSize = 256;
+                const bufferLength = analyser.frequencyBinCount;
                 const dataArray = new Uint8Array(bufferLength);
                 function checkVolume() {
-                    analyzer.getByteFrequencyData(dataArray);
+                    analyser.getByteFrequencyData(dataArray);
                     let sum = 0;
                     for(let i = 0; i < bufferLength; i++) { sum += dataArray[i]; }
                     let average = sum / bufferLength;
